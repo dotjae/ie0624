@@ -1,27 +1,20 @@
-// #include <pic12f683.h>
-#include <xc.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+#include <pic14/pic12f683.h> // Adjust this include for your specific PIC model
 #include <stdint.h>
 
-// typedef unsigned int word;
-// word __at 0x2007 __CONFIG = (_BODEN_OFF); 
-#pragma config BOREN = OFF  
-// int NUM = 4;
+// Define configuration bits (this might need adjustment based on your PIC and requirements)
+typedef unsigned int word;
+word __at 0x2007 __CONFIG = (_WDTE_OFF & _MCLRE_OFF);
 
 
-// Linear Feedback Shift Register (LFSR) for pseudo-random number generation
+// Define functions and logic as per your original code
 uint8_t lfsr_random() {
-    static uint16_t lfsr = 0xACE1u; // Example seed
-    unsigned lsb = lfsr & 1;  // Get least significant bit
-    lfsr >>= 1;               // Shift register
-    if (lsb)                  // Apply toggle mask
+    static uint16_t lfsr = 0xACE1u;
+    unsigned lsb = lfsr & 1;
+    lfsr >>= 1;
+    if (lsb)
         lfsr ^= 0xB400u;
-    return (uint8_t)(lfsr & 0x07); // Return only the lowest 3 bits
+    return (uint8_t)(lfsr & 0x07);
 }
-
-
 
 void dec2bin(int num, int binary[3]) {
     for (int i = 0; i < 3; i++) {
@@ -31,70 +24,47 @@ void dec2bin(int num, int binary[3]) {
 
 void delay(unsigned int tiempo) {
     unsigned int i, j;
-    for(i = 0; i < tiempo; i++) {
-        for(j = 0; j < 1275; j++);
+    for (i = 0; i < tiempo; i++) {
+        for (j = 0; j < 1275; j++);
     }
 }
-
 
 void main() {
-    TRISIO = 0x00; // Set GPIOs as outputs.
+    TRISIO = 0x10;   // TRISIO4 = 1; Set GP4 as input (for the button)
+    ANSEL = 0x00;
+    GPIO = 0x00;      // Set all GPIOs as outputs
+    // GP4 = 1;
 
-    while(1) {
-        // Get binary representation of NUM.
-        uint8_t random_number = lfsr_random() % 6 + 1; // Generate a number between 1 and 6
+    
+    while (1) {
+        // Wait for button press
+        while (GP4 == 0) {
+            // Do nothing, just wait here
 
 
-
-        int binary[3]; // array to store generated number in 
-        // int NUM = 6;
-        int NUM = (int) random_number;
-        dec2bin(NUM, binary);
-
-        // Assign each bit to its corresponding pin.
-
-        if (GP4 == 1){
-                GP0 = binary[0];
-                GP1 = binary[1];
-                GP2 = binary[2];
-                delay(250);
+            // GPIO = 0x01;
         }
+            // GPIO = 0x04;
+
+
+        // Button is pressed, generate random number and convert to binary
+        uint8_t random_number = lfsr_random() % 6 + 1;
+        int binary[3];
+        dec2bin(random_number, binary);
+
+        // Assign each bit to its corresponding pin
+        // GP0 = binary[0];
+        // GP1 = binary[1];
+        // GP2 = binary[2];
+
+        GPIO = 0x00 + 4*binary[2] + 2*binary[1] + 1*binary[0];
+
+        delay(250);
+        // Wait for button release
+        while (GP4 == 1) {
+            // Do nothing, just wait here
+        }
+
+        delay(250); // Optional delay
     }
 }
-
-
-// void main(void) {
-//     TRISIO = 0x10; // P5 = input, rest are outputs
-//     // ANSEL = 0x48; // FOSC/4, P5 = AN3
-
-    // while (1) {
-
-    //     GPIO = 0x00;
-    //     if (GP4 == 1) { // Check if P4 is high
-            // GPIO = 0x04; // Set P0 high (turn LED on)
-        // } else {
-        //     GPIO = 0x01; // Set P0 low (turn LED off)
-        // }
-
-    //         GPIO &= 0x0F;
-
-    //         delay(100);
-    //         GPIO = 0x0F;
-
-    //         delay(100);
-
-    //     } else {
-    //         GPIO = 0x00; // Keep LED off if button is not pressed
-    //     }
-    // }
-    // while (1) {
-    //     if (GPIO.0 == 1)
-    //     {
-    //         GPIO = 0x01; // Set P0 high (turn LED on)
-    //         delay(100);  
-
-    //         GPIO = 0x00; // Set P0 low (turn LED off)
-    //         delay(100);  
-    //     }
-    // }
-// }      
