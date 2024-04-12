@@ -16,17 +16,12 @@ typedef enum {
 state_t current_state = STATE_A, last_state = STATE_A;
 uint16_t timer_ticks = 0; // Overflow counter
 uint8_t A2B=0, B2C=0, C2D=0, D2E=0, E2F=0, F2D=0, D2A=0; // State transition variables
+uint8_t BUTTON_PRESSED = 0;
 
 // ISR for pin-change interrupt on PORTB
 ISR(PCINT0_vect) {
     cli();
-    if (PINB & (1 << PINB7)) {
-        // Button pressed, turn on LEDs on B4 and B5, and turn off LEDs on B2, B3, and B6
-        // PORTB = (PORTB & ~((1 << PINB2) | (1 << PINB3) | (1 << PINB6))) | ((1 << PINB4) | (1 << PINB5));
-    } else {
-        // Button not pressed, turn on LEDs on B2, B3, and B6, and turn off LEDs on B4 and B5
-        // PORTB = (PORTB & ~((1 << PINB4) | (1 << PINB5))) | ((1 << PINB2) | (1 << PINB3) | (1 << PINB6));
-    }
+    BUTTON_PRESSED = 1;
     sei();
 }
 
@@ -38,15 +33,18 @@ ISR(TIMER1_OVF_vect)
     // Check for state durations and transitions
     switch (current_state){
         case STATE_A:
-            if (timer_ticks >= 10) {   // 10 seconds passed
-                if (A2B == 0) {
+            if (timer_ticks >= 10 && BUTTON_PRESSED) {   // 10 seconds passed
+                if (A2B == 0) 
+                {
                     A2B = 1; 
                     timer_ticks = 0;     // Reset timer 
+                    BUTTON_PRESSED = 0;
                 }
             }
             break;
         case STATE_B:
-            if (timer_ticks >= 3) {  // 3 seconds 
+            if (timer_ticks >= 3)
+            {  // 3 seconds 
                 if (B2C == 0){
                     B2C = 1;
                     timer_ticks = 0;     // Reset timer
@@ -102,7 +100,11 @@ ISR(TIMER1_OVF_vect)
 int main(void) {
     DDRB = 0x1F; // Set B1-B7 as outputs
     DDRB &= ~(1 << BUTTON_PIN);   // Set B7 as input
-
+    
+    // Enable pin change interrupt for PORTB
+    GIMSK |= (1 << PCIE0);  // Enable pin change interrupt
+    PCMSK |= (1 << PCINT7); // Enable pin change interrupt for B7
+    
     // Timer setup
     TCCR1B |= (1 << CS12);        // Set prescaler to 256
     TIMSK |= (1 << TOIE1);        // Enable Timer1 overflow interrupt
