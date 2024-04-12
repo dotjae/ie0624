@@ -17,12 +17,27 @@ state_t current_state = STATE_A, last_state = STATE_A;
 uint16_t timer_ticks = 0; // Overflow counter
 uint8_t A2B=0, B2C=0, C2D=0, D2E=0, E2F=0, F2D=0, D2A=0; // State transition variables
 uint8_t BUTTON_PRESSED = 0;
+uint16_t blink = 0;
 
 // ISR for pin-change interrupt on PORTB
 ISR(PCINT0_vect) {
     cli();
     BUTTON_PRESSED = 1;
     sei();
+}
+
+ISR(TIMER1_COMPA_vect)
+{
+    blink++;
+    switch (current_state)
+    {
+        case STATE_B: 
+            PORTB = PORTB ^ 0x01;
+            break;
+        case STATE_F:
+            PORTB = PORTB ^ 0x08;
+            break;
+    }
 }
 
 // ISR for Timer1 overflow
@@ -43,9 +58,22 @@ ISR(TIMER1_OVF_vect)
             }
             break;
         case STATE_B:
-            if (timer_ticks >= 3)
-            {  // 3 seconds 
-                if (B2C == 0){
+            // activamos timer0, haga blink
+            // TCNT1L = 0x00;
+            // TCNT1H = 0x00;
+            
+            TIMSK |= (1 << OCIE1A);     // enable compare A interrupt for timer1 
+            TCCR1B |= (1 << WGM12);     // CTC timer1
+             
+            if (blink >= 6)
+            {
+                if (B2C == 0)
+                {
+                    TIMSK &= 0xBF;
+                    TCCR1B &= 0xF7;
+                    blink = 0;
+
+                    TCCR0B = 0x00;      // check this 
                     B2C = 1;
                     timer_ticks = 0;     // Reset timer
                 }   
@@ -86,8 +114,17 @@ ISR(TIMER1_OVF_vect)
             }
             break;
         case STATE_F:
-            if (timer_ticks >= 3) {  // 3 seconds 
+            // TCNT1L = 0x00;
+            // TCNT1H = 0x00;
+            
+            TIMSK |= (1 << OCIE1A);     // enable compare A interrupt for timer1 
+            TCCR1B |= (1 << WGM12);     // CTC timer1
+             
+            if (blink >= 6) {  // 3 seconds 
                 if (F2D == 0){
+                    TIMSK &= 0xBF;
+                    TCCR1B &= 0xF7;
+                    blink = 0;
                     F2D = 1;
                     timer_ticks = 0;     // Reset timer
                 }   
@@ -106,8 +143,9 @@ int main(void) {
     PCMSK |= (1 << PCINT7); // Enable pin change interrupt for B7
     
     // Timer setup
-    TCCR1B |= (1 << CS12);        // Set prescaler to 256
-    TIMSK |= (1 << TOIE1);        // Enable Timer1 overflow interrupt
+    TCCR1B |= (1 << CS11) | (1 << CS10); // Set prescaler to 256
+    TIMSK |= (1 << TOIE1);               // Enable Timer1 overflow interrupt
+    OCR1A = 0x7A12;
     sei();                        // Enable global interrupts
    
     while (1) {
@@ -117,7 +155,7 @@ int main(void) {
 
                 if (A2B) { 
                     A2B = 0;
-                    PORTB = 0x00;
+                    // PORTB = 0x00;
                     last_state = STATE_A;
                     current_state = STATE_B;  // Change to state B after delay
                 }
@@ -126,7 +164,7 @@ int main(void) {
                 PORTB |= (1 << 4);
                 
                 // ADD BLINKING BEHAVIOR
-                PORTB |= (1 << 0) | (1 << 1) | (1 << 2);
+                // PORTB |= (1 << 0) | (1 << 1) | (1 << 2);
 
                 if (B2C) { 
                     B2C = 0;
@@ -165,7 +203,7 @@ int main(void) {
 
                 if (E2F) { 
                     E2F = 0;
-                    PORTB = 0x00;
+                    // PORTB = 0x00;
                     last_state = STATE_E;
                     current_state = STATE_F;  // Change to state F after delay
                 }
@@ -174,7 +212,7 @@ int main(void) {
                 PORTB |= (1 << 2);
                
                 // ADD BLINKING BEHAVIOR
-                PORTB |= (1 << 3) | (1 << 4);
+                // PORTB |= (1 << 3) | (1 << 4);
 
                 if (F2D) { 
                     F2D = 0;
