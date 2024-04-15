@@ -1,132 +1,132 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#define BUTTON_PIN PINB7
+// Parameters for button and LEDs
+#define BUTTON PINB7
+#define LDPV PINB0
+#define LDVA PINB1
+#define LDVD PINB2
+#define LDPP PINB3
+#define LDPD PINB4
 
 // Enum to represent the states
 typedef enum {
-    STATE_A,
-    STATE_B,
-    STATE_C,
-    STATE_D,
-    STATE_E,
-    STATE_F
+    STATE_A,    // VEHICULE GREEN
+    STATE_B,    // VEHICULE GREEN BLINK 
+    STATE_C,    // YELLOW
+    STATE_D,    // WAIT RED
+    STATE_E,    // PEDESTRIAN GREEN
+    STATE_F     // PEDESTRIAN GREEN BLINK
 } state_t;
 
-state_t current_state = STATE_A, last_state = STATE_A;
-uint16_t timer_ticks = 0; // Overflow counter
-uint8_t A2B=0, B2C=0, C2D=0, D2E=0, E2F=0, F2D=0, D2A=0; // State transition variables
-uint8_t BUTTON_PRESSED = 0;
-uint16_t blink = 0;
+// Global variables
+state_t CURRENT_STATE = STATE_A, last_state = STATE_A;      // Current and Last State variables
+uint16_t TIMER_OVERFLOWS = 0;                               // Overflow counter
+uint16_t BLINK_COUNTER = 0;                                 // Blink counter
+uint8_t BUTTON_PRESSED = 0;                                 // Button flag
+uint8_t A2B=0, B2C=0, C2D=0, D2E=0, E2F=0, F2D=0, D2A=0;    // State transition variables
+
 
 // ISR for pin-change interrupt on PORTB
 ISR(PCINT0_vect) {
-    cli();
-    BUTTON_PRESSED = 1;
-    sei();
+    BUTTON_PRESSED = 1;     // Set button flag to 1
 }
 
+// ISR for Timer 1 Compare Match A 
 ISR(TIMER1_COMPA_vect)
 {
-    blink++;
-    switch (current_state)
+    BLINK_COUNTER++;                 // Update blink counter
+
+    switch (CURRENT_STATE)
     {
         case STATE_B: 
-            PORTB = PORTB ^ 0x01;
+            PORTB ^= (1 << LDPV);   // LDPV = ~LDPV  
             break;
         case STATE_F:
-            PORTB = PORTB ^ 0x08;
+            PORTB ^= (1 << LDPP);   // LDPP = ~LDPP
             break;
     }
 }
 
-// ISR for Timer1 overflow
+// ISR for Timer1 Overflow
 ISR(TIMER1_OVF_vect)
 {
-    timer_ticks++;  // Increment the overflow counter 
+    TIMER_OVERFLOWS++;  // Update overflow counter 
 
     // Check for state durations and transitions
-    switch (current_state){
+    switch (CURRENT_STATE){
         case STATE_A:
-            if (timer_ticks >= 10 && BUTTON_PRESSED) {   // 10 seconds passed
+            if (TIMER_OVERFLOWS >= 8 && BUTTON_PRESSED) {   // ~=10 seconds AND BUTTON_PRESSED
                 if (A2B == 0) 
                 {
-                    A2B = 1; 
-                    timer_ticks = 0;     // Reset timer 
-                    BUTTON_PRESSED = 0;
+                    A2B = 1;                                // Activate transition state
+                    TIMER_OVERFLOWS = 0;                    // Reset timer 
+                    BUTTON_PRESSED = 0;                     // Reset button flag
                 }
             }
             break;
         case STATE_B:
-            // activamos timer0, haga blink
-            // TCNT1L = 0x00;
-            // TCNT1H = 0x00;
             
-            TIMSK |= (1 << OCIE1A);     // enable compare A interrupt for timer1 
-            TCCR1B |= (1 << WGM12);     // CTC timer1
+            TIMSK |= (1 << OCIE1A);     // Enable Compare A Interrupt for Timer 1 
+            TCCR1B |= (1 << WGM12);     // Enable CTC Timer 1
              
-            if (blink >= 6)
+            if (BLINK_COUNTER >= 7)     // Blink finished
             {
                 if (B2C == 0)
                 {
-                    TIMSK &= 0xBF;
-                    TCCR1B &= 0xF7;
-                    blink = 0;
-
-                    TCCR0B = 0x00;      // check this 
                     B2C = 1;
-                    timer_ticks = 0;     // Reset timer
+                    TIMSK ^= (1 << OCIE1A);     // Disable Compare A Interrupt for Timer 1 
+                    TCCR1B ^= (1 << WGM12);     // Disable CTC Timer 1
+                    BLINK_COUNTER = 0;         
+                    TIMER_OVERFLOWS = 0;        
                 }   
             }
             break;
         case STATE_C:
-            if (timer_ticks >= 3) {  // 3 seconds 
+            if (TIMER_OVERFLOWS >= 3) {     // ~=3 seconds 
                 if (C2D == 0){
                     C2D = 1;
-                    timer_ticks = 0;     // Reset timer
+                    TIMER_OVERFLOWS = 0;    
                 }   
             }
             break;
         case STATE_D:
-            if (timer_ticks >= 1) {  // 1 second
+            if (TIMER_OVERFLOWS >= 1) {     // ~=1 second
                 switch (last_state) {
                     case STATE_C:
                         if (D2E == 0) {
                             D2E = 1;
-                            timer_ticks = 0;
+                            TIMER_OVERFLOWS = 0;
                         }
                         break;
                     case STATE_F:
                         if (D2A == 0) {
                             D2A = 1;
-                            timer_ticks = 0;
+                            TIMER_OVERFLOWS = 0;
                         }
                         break;
                 }
             }
             break;
         case STATE_E:
-            if (timer_ticks >= 10) {  // 10 seconds 
+            if (TIMER_OVERFLOWS >= 8) {     // ~=10 seconds 
                 if (E2F == 0){
                     E2F = 1;
-                    timer_ticks = 0;     // Reset timer
+                    TIMER_OVERFLOWS = 0;  
                 }   
             }
             break;
         case STATE_F:
-            // TCNT1L = 0x00;
-            // TCNT1H = 0x00;
-            
-            TIMSK |= (1 << OCIE1A);     // enable compare A interrupt for timer1 
-            TCCR1B |= (1 << WGM12);     // CTC timer1
+            TIMSK |= (1 << OCIE1A);     // Enable Compare A Interrupt for Timer 1 
+            TCCR1B |= (1 << WGM12);     // Enable CTC Timer 1
              
-            if (blink >= 6) {  // 3 seconds 
+            if (BLINK_COUNTER >= 7) {           // 3 seconds 
                 if (F2D == 0){
-                    TIMSK &= 0xBF;
-                    TCCR1B &= 0xF7;
-                    blink = 0;
                     F2D = 1;
-                    timer_ticks = 0;     // Reset timer
+                    TIMSK ^= (1 << OCIE1A);     // Disable Compare A Interrupt for Timer 1 
+                    TCCR1B ^= (1 << WGM12);     // Disable CTC Timer 1
+                    BLINK_COUNTER = 0;
+                    TIMER_OVERFLOWS = 0;     
                 }   
             }
             break;
@@ -135,90 +135,84 @@ ISR(TIMER1_OVF_vect)
 
 
 int main(void) {
-    DDRB = 0x1F; // Set B1-B7 as outputs
-    DDRB &= ~(1 << BUTTON_PIN);   // Set B7 as input
+    // GPIO setup
+    DDRB |= (1 << LDPV) | (1 << LDVA) |  (1 << LDVD) |  (1 << LDPP) | (1 << LDPD); // Set LEDs pins as outputs
+    DDRB &= ~(1 << BUTTON);                                                        // Set Button pin as input
     
     // Enable pin change interrupt for PORTB
-    GIMSK |= (1 << PCIE0);  // Enable pin change interrupt
-    PCMSK |= (1 << PCINT7); // Enable pin change interrupt for B7
+    GIMSK |= (1 << PCIE0);                  // Enable pin change interrupt
+    PCMSK |= (1 << BUTTON);                 // Enable pin change interrupt for B7
     
     // Timer setup
-    TCCR1B |= (1 << CS11) | (1 << CS10); // Set prescaler to 256
-    TIMSK |= (1 << TOIE1);               // Enable Timer1 overflow interrupt
-    OCR1A = 0x7A12;
-    sei();                        // Enable global interrupts
+    TCCR1B |= (1 << CS11) | (1 << CS10);    // Set prescaler to 256
+    TIMSK |= (1 << TOIE1);                  // Enable Timer1 overflow interrupt
+    OCR1A = 0x7A12;                         // Set value to compare with
+
+    // Enable global interrupts
+    sei();                                  
    
     while (1) {
-        switch (current_state) {
+        switch (CURRENT_STATE) {
             case STATE_A:
-                PORTB |= (1 << 0) | (1 << 4);  // Turn on B0(PV) & B4(PD)  
+                PORTB |= (1 << LDPV) | (1 << LDPD);  // LDPV & LDPD ON
 
                 if (A2B) { 
-                    A2B = 0;
-                    // PORTB = 0x00;
-                    last_state = STATE_A;
-                    current_state = STATE_B;  // Change to state B after delay
+                    A2B = 0;                         // Reset State Transition variable
+                    last_state = STATE_A;            // Update Last State
+                    CURRENT_STATE = STATE_B;         // Update Current State
                 }
                 break;
             case STATE_B:
-                PORTB |= (1 << 4);
-                
-                // ADD BLINKING BEHAVIOR
-                // PORTB |= (1 << 0) | (1 << 1) | (1 << 2);
+                // No change in LEDs status needed
 
                 if (B2C) { 
-                    B2C = 0;
-                    PORTB = 0x00;
-                    last_state = STATE_B;
-                    current_state = STATE_C;  // Change to state C after delay
+                    B2C = 0;       
+                    last_state = STATE_B;      
+                    CURRENT_STATE = STATE_C;    
                 }
                 break;
             case STATE_C:
-                PORTB |= (1 << 1) | (1 << 4);  // Turn on B1(VA) & B4(PD) 
+                PORTB |= (1 << LDVA) | (1 << LDPD);  // LDVA & LDPD ON
 
                 last_state = STATE_C;
                 if (C2D) { 
                     C2D = 0;
-                    PORTB = 0x00;
-                    current_state = STATE_D;  // Change to state D after delay
+                    PORTB &= (0 << LDVA);            // LDVA OFF
+                    CURRENT_STATE = STATE_D; 
                 }
                 break;
             case STATE_D:
-                PORTB |= (1 << 2) | (1 << 4);  // Turn on B2(VD) & B4(PD)  
+                PORTB |= (1 << LDVD) | (1 << LDPD);  // LDVD & LDPD ON
                 
                 if (D2E){
                     D2E = 0;
-                    PORTB = 0x00;
-                    current_state = STATE_E; // Change to state E after delay
+                    PORTB &= (0 << LDPD);            // LDPD OFF
+                    CURRENT_STATE = STATE_E;
                     last_state = STATE_D;
                 }  
                 else if (D2A){
                     D2A = 0;
-                    PORTB = 0x00;
-                    current_state = STATE_A; // Change to state A after delay
+                    PORTB &= (0 << LDVD);           // LDVD OFF
+                    CURRENT_STATE = STATE_A;
                 }
                 break;
             case STATE_E:
-                PORTB |= (1 << 3) | (1 << 2);  // Turn on B3(PP) & B2(VD)  
+                PORTB |= (1 << LDPP) | (1 << LDVD);  // LDPP & LDVD ON
 
                 if (E2F) { 
                     E2F = 0;
-                    // PORTB = 0x00;
                     last_state = STATE_E;
-                    current_state = STATE_F;  // Change to state F after delay
+                    CURRENT_STATE = STATE_F;
                 }
                 break;
             case STATE_F:
-                PORTB |= (1 << 2);
-               
-                // ADD BLINKING BEHAVIOR
-                // PORTB |= (1 << 3) | (1 << 4);
-
+                // No changes to LEDs status needed
+ 
                 if (F2D) { 
                     F2D = 0;
-                    PORTB = 0x00;
+                    PORTB &= (0 << LDPP);   // LDPP OFF
                     last_state = STATE_F;
-                    current_state = STATE_D;  // Change to state D after delay
+                    CURRENT_STATE = STATE_D;
                 }
                 break;
             
