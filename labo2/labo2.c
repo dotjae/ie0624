@@ -20,7 +20,8 @@ typedef enum {
 } state_t;
 
 // Global variables
-state_t CURRENT_STATE = STATE_A, last_state = STATE_A;      // Current and Last State variables
+state_t CURRENT_STATE = STATE_A;                            // Current State variable
+state_t PREVIOUS_STATE = STATE_A;                           // Previous State variable
 uint16_t TIMER_OVERFLOWS = 0;                               // Overflow counter
 uint16_t BLINK_COUNTER = 0;                                 // Blink counter
 uint8_t BUTTON_PRESSED = 0;                                 // Button flag
@@ -92,7 +93,7 @@ ISR(TIMER1_OVF_vect)
             break;
         case STATE_D:
             if (TIMER_OVERFLOWS >= 1) {     // ~=1 second
-                switch (last_state) {
+                switch (PREVIOUS_STATE) {
                     case STATE_C:
                         if (D2E == 0) {
                             D2E = 1;
@@ -158,7 +159,7 @@ int main(void) {
 
                 if (A2B) { 
                     A2B = 0;                         // Reset State Transition variable
-                    last_state = STATE_A;            // Update Last State
+                    PREVIOUS_STATE = STATE_A;            // Update Last State
                     CURRENT_STATE = STATE_B;         // Update Current State
                 }
                 break;
@@ -167,14 +168,14 @@ int main(void) {
 
                 if (B2C) { 
                     B2C = 0;       
-                    last_state = STATE_B;      
+                    PREVIOUS_STATE = STATE_B;      
                     CURRENT_STATE = STATE_C;    
                 }
                 break;
             case STATE_C:
                 PORTB |= (1 << LDVA) | (1 << LDPD);  // LDVA & LDPD ON
 
-                last_state = STATE_C;
+                PREVIOUS_STATE = STATE_C;
                 if (C2D) { 
                     C2D = 0;
                     PORTB &= (0 << LDVA);            // LDVA OFF
@@ -188,7 +189,7 @@ int main(void) {
                     D2E = 0;
                     PORTB &= (0 << LDPD);            // LDPD OFF
                     CURRENT_STATE = STATE_E;
-                    last_state = STATE_D;
+                    PREVIOUS_STATE = STATE_D;
                 }  
                 else if (D2A){
                     D2A = 0;
@@ -201,7 +202,7 @@ int main(void) {
 
                 if (E2F) { 
                     E2F = 0;
-                    last_state = STATE_E;
+                    PREVIOUS_STATE = STATE_E;
                     CURRENT_STATE = STATE_F;
                 }
                 break;
@@ -211,7 +212,7 @@ int main(void) {
                 if (F2D) { 
                     F2D = 0;
                     PORTB &= (0 << LDPP);   // LDPP OFF
-                    last_state = STATE_F;
+                    PREVIOUS_STATE = STATE_F;
                     CURRENT_STATE = STATE_D;
                 }
                 break;
