@@ -1,12 +1,13 @@
-//#include <PCD8544.h>
+#include <PCD8544.h>
 #include <PID_v1_bc.h> // https://github.com/drf5n/Arduino-PID-Library
 
 double Setpoint, Entrada, Salida, x;
 double Kp = 2, Ki = 5, Kd = 1;
 PID myPID(&Entrada, &Salida, &Setpoint, Kp, Ki, Kd, P_ON_E, DIRECT);
 
-const int OUT_PIN = 6;  				
+const int OUT_PIN = 10;  				
 const int SETPOINT_PIN = A1;   	
+static PCD8544 lcd;
 
 void setup()
 {
@@ -16,6 +17,9 @@ void setup()
   	myPID.SetMode(AUTOMATIC);
   	Entrada = simPlant(20.0 * (int)25/255); 	// start plant simulation at room temperature
   	Serial.println("Referencia Temperatura SalidaPID CalorQ");
+
+	lcd.begin();
+	lcd.clear();
 }
 
 void loop()
@@ -31,6 +35,9 @@ void loop()
 		Setpoint = 4 * x/85 + 30;				// setpoint normalized to 30-42 celsius range
 	}
 	report();								// print to serial monitor setpoint, temperature, pid output, heat
+	
+	lcd.setCursor(0,0);
+	lcd.print("Hello World!");
 }
 
 void report(void)
