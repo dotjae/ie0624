@@ -33,8 +33,7 @@ void loop()
 		analogWrite(OUT_PIN, (int)Salida);		// write PID output to PWM pin
 		x = analogRead(SETPOINT_PIN) / 4;		// read setpoint from pot in range 0-255
 		Setpoint = 4 * x/85 + 30;				// setpoint normalized to 30-42 celsius range
-	}
-	report();								// print to serial monitor setpoint, temperature, pid output, heat
+	}							
 	
 	lcd.setCursor(0,0);
 	lcd.print("Temp de Op: ");
@@ -54,23 +53,6 @@ void loop()
 	lcd.print(Setpoint);
 	lcd.setCursor(30,5);
 	lcd.print(" Celsius");
-}
-
-void report(void)
-{
-  	static uint32_t last = 0;
-  	const int interval = 1000;
-  	if (millis() - last > interval)				// print to serial monitor each second
-	{
-    		last += interval;
-    		Serial.print(Setpoint);
-    		Serial.print(' ');
-    		Serial.print(Entrada);
-    		Serial.print(' ');
-    		Serial.print(Salida);
-   		Serial.print(' ');
-    		Serial.println(20.0 * (int)Salida/255);
-  }
 }
 
 float simPlant(float Q) 
