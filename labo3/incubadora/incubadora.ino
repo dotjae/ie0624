@@ -1,40 +1,74 @@
-#include <PIDController.h>
-PIDController pid;
+//#include <PCD8544.h>
+#include <PID_v1_bc.h> // https://github.com/drf5n/Arduino-PID-Library
 
-void setup () 
+double Setpoint, Entrada, Salida, x;
+double Kp = 2, Ki = 5, Kd = 1;
+PID myPID(&Entrada, &Salida, &Setpoint, Kp, Ki, Kd, P_ON_E, DIRECT);
+
+const int OUT_PIN = 6;  				
+const int SETPOINT_PIN = A1;   	
+
+void setup()
 {
-  Serial.begin(9600);         	// Some methods require the Serial.begin() method to be called first
-  pid.begin();               	// initialize the PID instance
-  pid.tune(10, 10, 10);       	// Tune the PID, arguments: kP, kI, kD
-  pid.limit(0, 255);           // Limit the PID output between 0 and 255, this is important to get rid of integral windup!
-  pinMode(3, OUTPUT);
-  pid.setpoint(300);    		// The "goal" the PID controller tries to "reach"
+	Serial.begin(115200);
+  	myPID.SetOutputLimits(0, 255);		// PID output in range 0-255
+  	Setpoint = 36;					// 36 celsius as starting setpoint
+  	myPID.SetMode(AUTOMATIC);
+  	Entrada = simPlant(20.0 * (int)25/255); 	// start plant simulation at room temperature
+  	Serial.println("Referencia Temperatura SalidaPID CalorQ");
 }
 
-void loop () {
-  int sensorValue = analogRead(A0);         // Read the value from the sensor
-  int output = pid.compute(sensorValue);    // Let the PID compute the value, returns the optimal output
-  analogWrite(3, output);                   // Delay for 30 ms
-  Serial.print("Valor del sensor: ");
-  Serial.print(sensorValue);
-  Serial.print("\n");
+void loop()
+{
+	float TempWatts = (int)Salida * 20.0 / 255;	// actuator
+	float TempInc = simPlant(TempWatts); 		// plant simulation with desired heat input
+	Entrada = TempInc;  					
+
+	if (myPID.Compute())
+	{
+		analogWrite(OUT_PIN, (int)Salida);		// write PID output to PWM pin
+		x = analogRead(SETPOINT_PIN) / 4;		// read setpoint from pot in range 0-255
+		Setpoint = 4 * x/85 + 30;				// setpoint normalized to 30-42 celsius range
+	}
+	report();								// print to serial monitor setpoint, temperature, pid output, heat
 }
 
-float simPlanta(float Q) {
-    float h = 5;            // W/m2K coeficiente de conveccion termica para el Aluminio
-    float Cps = 0.89;       // J/gC
-    float area = 1E-4;      // m2 area por conveccion
-    float masa = 10 ;       // g
-    float Tamb = 25;        // Temperatura ambiente en C
-    static float T = Tamb;  // Temperatura en C
-    static uint32_t last = 0;
-    uint32_t interval = 100;    // ms
+void report(void)
+{
+  	static uint32_t last = 0;
+  	const int interval = 1000;
+  	if (millis() - last > interval)				// print to serial monitor each second
+	{
+    		last += interval;
+    		Serial.print(Setpoint);
+    		Serial.print(' ');
+    		Serial.print(Entrada);
+    		Serial.print(' ');
+    		Serial.print(Salida);
+   		Serial.print(' ');
+    		Serial.println(20.0 * (int)Salida/255);
+  }
+}
 
-    if(millis() - last >= interval)
-    {
-      last += interval;
-      // 0-transferencia de calor
-      T += Q*interval/1000/masa/Cps - (T - Tamb)*area*h;
-    }
-    return T;
+float simPlant(float Q) 
+{ 
+	// heat input in W (or J/s)
+	// simulate a 1x1x2cm aluminum block with a heater and passive ambient cooling
+	// float C = 237; // W/mK thermal conduction coefficient for Al
+	float h = 5; 		// W/m2K thermal convection coefficient for Al passive
+	float Cps = 0.89; 	// J/g°C
+	float area = 1e-4; 	// m2 area for convection
+	float mass = 10 ; 	// g
+	float Tamb = 25; 	// °C
+	static float T = Tamb;	// °C
+	static uint32_t last = 0;
+	uint32_t interval = 100; 	// ms
+
+	if (millis() - last >= interval) 
+	{
+		last += interval;
+		// 0-dimensional heat transfer
+		T = T + Q * interval / 1000 / mass / Cps - (T - Tamb) * area * h;
+	}
+	return T;
 }
