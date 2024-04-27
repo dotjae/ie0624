@@ -34,7 +34,7 @@ Circuit Id: Arduino Uno-1
 
 Unique  Id: Potentiometer-91: 
 Circuit Id: Potentiometer-91
-<item valLabely="-13" labely="-40" labelrot="0" objectName="Potentiometer-91" id="Potentiometer-91" boardRot="-1e+6" valLabelx="22" y="-292" circRot="-6.647915634538047e+304" vflip="1" hflip="1" Value_Ohm="739" Show_res="true" itemtype="Potentiometer" labelx="-16" Show_id="false" circPos="0,0" Unit=" kΩ" Resistance="1" mainComp="false" x="-176" valLabRot="-90" boardPos="-1e+6,-1e+6" rotation="90"/>
+<item valLabely="-13" labely="-40" labelrot="0" objectName="Potentiometer-91" id="Potentiometer-91" boardRot="-1e+6" valLabelx="22" y="-292" circRot="-6.647915634538047e+304" vflip="1" hflip="1" Value_Ohm="500" Show_res="true" itemtype="Potentiometer" labelx="-16" Show_id="false" circPos="0,0" Unit=" kΩ" Resistance="1" mainComp="false" x="-176" valLabRot="-90" boardPos="-1e+6,-1e+6" rotation="90"/>
 
 Unique  Id: Ground-93: 
 Circuit Id: Ground-93

@@ -37,7 +37,23 @@ void loop()
 	report();								// print to serial monitor setpoint, temperature, pid output, heat
 	
 	lcd.setCursor(0,0);
-	lcd.print("Hello World!");
+	lcd.print("Temp de Op: ");
+	lcd.setCursor(0,1);
+	lcd.print(TempInc);
+	lcd.setCursor(30,1);
+	lcd.print(" Celsius");
+	lcd.setCursor(0,2);
+	lcd.print("Senal de Ctrl:");
+	lcd.setCursor(0,3);
+	lcd.print(TempWatts);
+	lcd.setCursor(30,3);
+	lcd.print(" Watts");
+	lcd.setCursor(0,4);
+	lcd.print("Temp deseada:");
+	lcd.setCursor(0,5);
+	lcd.print(Setpoint);
+	lcd.setCursor(30,5);
+	lcd.print(" Celsius");
 }
 
 void report(void)
