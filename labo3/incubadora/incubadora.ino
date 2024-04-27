@@ -2,7 +2,9 @@
 #include <PID_v1_bc.h> // https://github.com/drf5n/Arduino-PID-Library
 
 double Setpoint, Entrada, Salida, x;
-double Kp = 2, Ki = 5, Kd = 1;
+//double Kp = 2, Ki = 5, Kd = 1;
+//double Kp = 17, Ki = .1, Kd = 2;
+double Kp = 255, Ki = .0, Kd = 0; 
 PID myPID(&Entrada, &Salida, &Setpoint, Kp, Ki, Kd, P_ON_E, DIRECT);
 
 const int OUT_PIN = 10;  				
@@ -30,7 +32,6 @@ void loop()
 
 	if (myPID.Compute())
 	{
-		analogWrite(OUT_PIN, (int)Salida);		// write PID output to PWM pin
 		x = analogRead(SETPOINT_PIN) / 4;		// read setpoint from pot in range 0-255
 		Setpoint = 4 * x/85 + 30;				// setpoint normalized to 30-42 celsius range
 	}							
