@@ -15,6 +15,7 @@ const int LCD_ENABLE = 2;
 const int HI = 8;
 const int OP = 9;
 const int LO = 10;
+const int SERIAL_ENABLE_PIN = 13;
 
 void setup()
 {
@@ -35,7 +36,11 @@ void setup()
 	pinMode(HI, OUTPUT);
 	pinMode(OP, OUTPUT);
 	pinMode(LO, OUTPUT);
+
+  // PC communication config
+  pinMode(SERIAL_ENABLE_PIN, INPUT);
 }
+
 
 void loop()
 {
@@ -96,6 +101,17 @@ void loop()
 		digitalWrite(HI, HIGH);
 		digitalWrite(OP, LOW);
 		digitalWrite(LO, LOW);
+	}
+
+
+	// Check if serial communication is enabled
+	if (digitalRead(SERIAL_ENABLE_PIN) == HIGH) {
+		Serial.print(Setpoint);
+		Serial.print(",");
+		Serial.print(Salida);
+		Serial.print(",");
+		Serial.print(Entrada);
+		Serial.println("");
 	}
 }
 
