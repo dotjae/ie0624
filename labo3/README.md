@@ -1,0 +1,34 @@
+# Laboratorio 3 - IE-0624
+
+## Simulador de Incubadora de Huevos Automática con Arduino UNO
+
+Este directorio contiene el código fuente necesario para correr la simulación de la incubadora de huevos automática diseñada utilizando el microcontrolador ArduinoUNO, simulado en el simulador SimulIDE.
+
+La incubadora simulada funciona de la siguiente manera:
+
+* El usuario, por medio de un potenciómetro, podrá ajustar la temperatura deseada dentro de la incubadora. Esta temperatura debe encontrarse en el rango de 30 a 42 grados Celsius. 
+* Por medio de una función llamada ```simPlanta()```, el Adruino se encargará de obtener y simular el calor requerido para realizar los cambios necesarios a la temperatura de la incubadora.
+* Por medio de un controlador PID (Proporcional, Integrativo, Derivativo), el Arduino UNO se encargará de ajustar la temperatura actual a la ingreseada por el usuario de acuerdo al resultado de la simulación de la planta.
+* Finalmente, el Arduino se encarga de enviar los datos de Setpoint (temperatura deseada), Salida del PID y Salida de la Planta a través del puerto serial UART el cual se conecta a una computadora personal en la cual un script de Python se encarga de almacenar y graficar los datos enviados por el microcontrolador. Detalles del uso de esta funcionalidad se delinearán más adelante.
+
+## Instalación
+
+Asegúrese de tener instalado el simulador SimulIDE (LINK) y el entorno de desarrollo ArduinoIDE (LINK), o bien algún compilador de Arduino a hexadecimal. Los detalles de esta instalación asumen el uso de un sistema operativo de la familia Linux.
+
+Una vez instalado todo, descargue este repositorio por medio del comando en terminal ```git clone https://github.com/dotjae/ie0624``` y diríjase al directorio **labo3** con el comando ```cd labo3```. 
+
+Corra el simulador SimulIDE y cargue el archivo **incubadora.simu**. Luego, cargue el archivo **incubadora.ino** al entorno ArduinoIDE y compilelo. Ecuentre el archivo **.hex** o **.elf** compilado (usualmente se encuentra en ```/tmp/arduino/sketches/```) y carguelo a la placa ArduinoUNO del simulador.
+
+Corra la simulación y ajuste la temperatura al ajustar el potenciómetro que está al lado del microcontrolador. Los valores de la temperatura ingresada, temperatura actual, y potencia consumida se pueden apreciar en la pantalla LCD que se observa. Para utilizarla es necesario bajar el switch con la etiqueta _LCD_.
+
+### CSV y Gráficas
+
+Para poder comunicarse con el puerto serial de la computadora por medio del simulador, es necesario simular un puerto serial de entrada y uno de salida. Para realizar esto utilice el comando:
+
+```socat -d -d pty,raw,echo=0 pty,raw,echo=0```
+
+Preste mucha atención a la ubicación de los puertos creados (por ejemplo: ```'/dev/pts/7'```). Ahora diríjase al simulador y abra el puerto serial del Arduino haciendo click derecho en él y seleccionando la opción "Open Serial Port". Una vez que el puerto serial se abra, diríjase a sus propiedades y en el Nombre coloque la dirección de el puerto de salida creado. Para habilitar la comunicación serial es necesario activar el switch con la etiqueta "PC".
+
+Finalmente, diríjase al script de Python llamado "PC_communication.py" y, en la línea 6, cambie el ```'/dev/pts/7'``` por la ubicación del puerto de entrada creado.
+
+En su terminal, mientras la simulación esté corriendo y el switch de PC esté activado, corra el comando ```python3 PC_communication.py``` y tres subgráficos con los datos del Setpoint, Salida del PID y Salida de la Planta en el tiempo. Para terminar el proceso utilice ```Ctrl+C``` o ```kill PID``` (en donde PID es el ID del proceso del script corriendo en su máquina). Una vez terminado el proceso, un archivo CSV llamado **temperature\_data.csv** se habrá creado con los datos obtenidos durante el tiempo de simulación.
