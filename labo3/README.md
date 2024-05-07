@@ -33,7 +33,7 @@ Para poder comunicarse con el puerto serial de la computadora por medio del simu
 
 ```socat -d -d pty,raw,echo=0 pty,raw,echo=0```
 
-Preste mucha atención a la ubicación de uno de los puertos creados (por ejemplo: ```'/dev/pts/7'```). Ahora diríjase al simulador y abra el puerto serial del Arduino haciendo click derecho en él y seleccionando la opción "Open Serial Port". Una vez que el puerto serial UART1 se abra, diríjase a sus propiedades y en el Nombre coloque la dirección de el puerto de salida creado. Para habilitar la comunicación serial es necesario activar el switch con la etiqueta _PC_ y asegurarse que el puerto UART se encuentre abierto (presionar Open en el puerto).
+Preste mucha atención a la ubicación de los puertos creados (por ejemplo: ```'/dev/pts/7'```). Ahora diríjase al simulador y abra el puerto serial del Arduino haciendo click derecho en él y seleccionando la opción "Open Serial Port". Una vez que el puerto serial UART1 se abra, diríjase a sus propiedades y en el Nombre coloque la dirección de uno de los puertos de salida creados. Para habilitar la comunicación serial es necesario activar el switch con la etiqueta _PC_ y asegurarse que el puerto UART se encuentre abierto (presionar Open en el puerto).
 
 
 En su terminal, mientras la simulación esté corriendo y el switch de PC esté activado, corra el comando: 
