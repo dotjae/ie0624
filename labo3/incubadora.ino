@@ -21,10 +21,10 @@ void setup()
 {
 	Serial.begin(115200);
 	// PID config
-  	myPID.SetOutputLimits(0, 255);		// PID output in range 0-255
+  	myPID.SetOutputLimits(-128, 128);		// PID output in range 0-255
   	Setpoint = 36;					// 36 celsius as starting setpoint
   	myPID.SetMode(AUTOMATIC);
-  	Entrada = simPlant(20.0 * (int)25/255); 	// start plant simulation at room temperature
+  	Entrada = simPlant(20.0 * (int)25/128); 	// start plant simulation at room temperature
   	Serial.println("Referencia Temperatura SalidaPID CalorQ");
 	
 	// LCD config
@@ -44,20 +44,20 @@ void setup()
 
 void loop()
 {
-	float TempWatts = (int)Salida * 20.0 / 255;	// actuator
+	float TempWatts = (int)Salida * 20.0 / 128;	// actuator
 	float TempInc = simPlant(TempWatts); 		// plant simulation with desired heat input
 	Entrada = TempInc;  					
 
 	if (myPID.Compute())
 	{
-		x = analogRead(SETPOINT_PIN) / 4;		// read setpoint from pot in range 0-255
-		Setpoint = 4 * x/85 + 30;				// setpoint normalized to 30-42 celsius range
+		x = analogRead(SETPOINT_PIN) / 8;		// read setpoint from pot in range 0-255
+		Setpoint = map(x,0,128,20,80);		    // setpoint normalized to 30-42 celsius range
 	}							
 	
 	LCDSwitch = digitalRead(LCD_ENABLE);
 	
 	// LCD screen switch
-	if (LCDSwitch == 0)
+	if (LCDSwitch == 1)
 	{
 		lcd.setCursor(0,0);
 		lcd.print("Temp de Op: ");
@@ -78,7 +78,7 @@ void loop()
 		lcd.setCursor(30,5);
 		lcd.print(" Celsius");
 	}
-	else if (LCDSwitch == 1)
+	else if (LCDSwitch == 0)
 	{
 		lcd.clear();
 	}
