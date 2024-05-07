@@ -33,14 +33,14 @@ Para poder comunicarse con el puerto serial de la computadora por medio del simu
 
 ```socat -d -d pty,raw,echo=0 pty,raw,echo=0```
 
-Preste mucha atención a la ubicación de los puertos creados (por ejemplo: ```'/dev/pts/7'```). Ahora diríjase al simulador y abra el puerto serial del Arduino haciendo click derecho en él y seleccionando la opción "Open Serial Port". Una vez que el puerto serial UART1 se abra, diríjase a sus propiedades y en el Nombre coloque la dirección de el puerto de salida creado. Para habilitar la comunicación serial es necesario activar el switch con la etiqueta _PC_ y asegurarse que el puerto UART se encuentre abierto (presionar Open en el puerto).
+Preste mucha atención a la ubicación de uno de los puertos creados (por ejemplo: ```'/dev/pts/7'```). Ahora diríjase al simulador y abra el puerto serial del Arduino haciendo click derecho en él y seleccionando la opción "Open Serial Port". Una vez que el puerto serial UART1 se abra, diríjase a sus propiedades y en el Nombre coloque la dirección de el puerto de salida creado. Para habilitar la comunicación serial es necesario activar el switch con la etiqueta _PC_ y asegurarse que el puerto UART se encuentre abierto (presionar Open en el puerto).
 
 
 En su terminal, mientras la simulación esté corriendo y el switch de PC esté activado, corra el comando: 
 
 ```python3 serial_communication.py --ser $PORT_PATH --csv $CSV_FILE --plt $PLOT_FILE``` 
 
-En donde **$PORT_PATH** es la ubicación del puerto creado (por ejemplo: ```dev/pts/7```), **$CSV_FILE** es el nombre del archivo CSV con los datos obtenidos en la simulación; y **$PLOT_FILE** es el nombre del archivo PNG en donde desea guardar la gráfica creada.
+En donde **$PORT_PATH** es la ubicación del puerto creado que no utilizó para el Arduino (por ejemplo: ```dev/pts/6```), **$CSV_FILE** es el nombre del archivo CSV con los datos obtenidos en la simulación; y **$PLOT_FILE** es el nombre del archivo PNG en donde desea guardar la gráfica creada.
 
 Luego de terminar la ejecución, una imagen con tres subgráficos de los datos del Setpoint, Salida del PID y Salida de la Planta en el tiempo, y con el nombre ingresado por el usuario, se almacenará en un directorio llamado ```plots```. De igual forma el archivo CSV con los datos obtenidos se encontrará en un directorio llamado ```csv_files```.
 
