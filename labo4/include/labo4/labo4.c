@@ -34,3 +34,8 @@ void lcd_pendientes(void)
 
     lcd_show_frame();   // actualizar pantalla 
 }
+
+void delay(void)
+{
+    for (int i = 0; i < 6000000; i++) __asm__ ( "nop" );
+}
