@@ -1,13 +1,14 @@
 PROJECT = firmware
 BUILD_DIR = bin
 
-SHARED_DIR = ../include 
+SHARED_DIR = ../include/gyro
+SHARED_DIR += ../include/lcd
 CFILES = pendientes.c
 CFILES += clock.c console.c font-7x12.c gfx.c lcd-spi.c sdram.c
 # AFILES += api-asm.S
 
 # TODO - you will need to edit these two lines! ojo
-DEVICE=stm32f407vgt6
+DEVICE=stm32f429zit6u
 OOCD_FILE = board/stm32f4discovery.cfg
 
 # You shouldn't have to edit anything below here.
