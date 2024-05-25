@@ -18,6 +18,7 @@
 #define GYR_OUT_Y_H		    0x2B
 #define GYR_OUT_Z_L		    0x2C
 #define GYR_OUT_Z_H		    0x2D
+#define GYR_OUT_TEMP        0x26
 
 // Bits
 #define GYR_RNW			        (1 << 7) 
@@ -39,3 +40,4 @@
 void mems_spi_init(void);
 uint8_t mems_read_reg(uint8_t reg);
 void mems_write_reg(uint8_t reg, uint8_t value);
+uint8_t mems_temp(void);

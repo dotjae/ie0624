@@ -1,13 +1,13 @@
 PROJECT = firmware
 BUILD_DIR = bin
 
-SHARED_DIR = ../include/gyro
+SHARED_DIR = ../include/mems
 SHARED_DIR += ../include/lcd-serial
 SHARED_DIR += ../include/labo4
 
 CFILES += mems.c
 CFILES += clock.c console.c font-7x12.c gfx.c lcd-spi.c sdram.c 
-CFILES += pendientes.c
+CFILES += slope.c
 CFILES += labo4.c
 
 DEVICE=stm32f429zit6u

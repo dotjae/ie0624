@@ -69,3 +69,8 @@ void mems_write_reg(uint8_t reg, uint8_t value)
     spi_read(SPI5);
     gpio_set(GPIOC, GPIO1);    
 }
+
+uint8_t mems_temp(void)
+{
+    return mems_read_reg(GYR_OUT_TEMP);
+}
