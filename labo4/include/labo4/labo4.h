@@ -7,5 +7,5 @@
 #include "gfx.h"
 #include "mems.h"
 
-void lcd_slope(uint8_t temperature);
+void lcd_slope(uint8_t temperature, mems reading);
 void delay(void);

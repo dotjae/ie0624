@@ -1,8 +1,8 @@
 #include "labo4.h"
 
-void lcd_slope(uint8_t temperature)
+void lcd_slope(uint8_t temperature, mems reading)
 {
-    char buf[4];
+    char buf[8];
 
     // interface
     gfx_fillScreen(LCD_BLACK);
@@ -31,11 +31,23 @@ void lcd_slope(uint8_t temperature)
     gfx_puts(buf);
 
     gfx_setCursor(15, 130);
-    gfx_puts("EJE X: 000");
+    gfx_puts("EJE X: ");
+    gfx_setCursor(65, 130);
+    sprintf(buf, "%3d", reading.x);
+    gfx_puts(buf);
+
     gfx_setCursor(15, 145);
-    gfx_puts("EJE Y: 000");
+    gfx_puts("EJE Y: ");
+    gfx_setCursor(65, 145);
+    sprintf(buf, "%3d", reading.y);
+    gfx_puts(buf);
+
     gfx_setCursor(15, 160);
-    gfx_puts("EJE Z: 000");
+    gfx_puts("EJE Z: ");
+    gfx_setCursor(65, 160);
+    sprintf(buf, "%3d", reading.z);
+    gfx_puts(buf);
+
     gfx_setCursor(15, 175);
     gfx_puts("COMM SERIAL: OFF");
     

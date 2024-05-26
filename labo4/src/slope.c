@@ -3,7 +3,8 @@
 int main(void)
 {
     uint8_t temperature;
-    
+    mems reading;
+
     /* INITS */
 	clock_setup();
 	console_setup(115200); 
@@ -15,6 +16,8 @@ int main(void)
 	while (1) 
     {   
         temperature = mems_temp();
-        lcd_slope(temperature);
+        reading = read_xyz();
+
+        lcd_slope(temperature, reading);
 	}
 }

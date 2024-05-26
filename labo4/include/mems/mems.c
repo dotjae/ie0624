@@ -35,15 +35,9 @@ void mems_spi_init(void)
     spi_enable(SPI5);
 
     // Inicialización de registros
-    mems_write_reg( GYR_CTRL_REG1, 
-                    GYR_CTRL_REG1_PD  | 
-                    GYR_CTRL_REG1_XEN | 
-                    GYR_CTRL_REG1_YEN | 
-                    GYR_CTRL_REG1_ZEN | 
-                    (3 << GYR_CTRL_REG1_BW_SHIFT));
-    
-    mems_write_reg( GYR_CTRL_REG4,
-                    (1 << GYR_CTRL_REG4_FS_SHIFT));
+    mems_write_reg(CTRL_REG1, 0x4f);
+    //mems_write_reg(CTRL_REG1, BW1 | BW0 | PD | ZEN | XEN | YEN);
+    mems_write_reg(CTRL_REG4, FS_250);
 }
 
 
@@ -52,7 +46,7 @@ uint8_t mems_read_reg(uint8_t reg)
     uint8_t result;
 
     gpio_clear(GPIOC, GPIO1);     
-    spi_send(SPI5, 0x80 | reg);       
+    spi_send(SPI5, RNW | reg);       
     spi_read(SPI5);                 
     spi_send(SPI5, 0);               
     result = spi_read(SPI5);  
@@ -70,7 +64,25 @@ void mems_write_reg(uint8_t reg, uint8_t value)
     gpio_set(GPIOC, GPIO1);    
 }
 
-uint8_t mems_temp(void)
+int8_t mems_temp(void)
 {
-    return mems_read_reg(GYR_OUT_TEMP);
+    return mems_read_reg(OUT_TEMP);
+}
+
+int16_t read_axis(uint8_t reg_low, uint8_t reg_high) 
+{
+    int16_t axis;
+    axis = mems_read_reg(reg_low);              
+    axis |= mems_read_reg(reg_high) << 8;
+    return axis;                                       
+}
+
+mems read_xyz(void) {
+    mems reading;
+    
+    reading.x = read_axis(OUT_X_L | RNW, OUT_X_H | RNW) * L3GD20_SENSITIVITY_250DPS;
+    reading.y = read_axis(OUT_Y_L | RNW, OUT_Y_H | RNW) * L3GD20_SENSITIVITY_250DPS;
+    reading.z = read_axis(OUT_Z_L | RNW, OUT_Z_H | RNW) * L3GD20_SENSITIVITY_250DPS;
+
+    return reading;
 }
