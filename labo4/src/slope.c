@@ -23,7 +23,8 @@ int main(void)
         temperature = mems_temp();
         xyzData.reading = read_xyz();
         xyzData = integrate_xyz(xyzData);
-        
+
+        five_degree_alert(xyzData);
         USART_enable = console_usart_enable(xyzData, USART_enable);
         lcd_slope(temperature, xyzData.reading, USART_enable);
 	}

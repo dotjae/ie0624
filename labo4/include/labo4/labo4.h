@@ -48,3 +48,4 @@ integral integrate_axis(double reading, double angle, double lastSampleTime);
 data integrate_xyz(data xyzData);
 void console_puts_slope(data xyzData);
 bool console_usart_enable(data xyzData, bool USART_enable);
+void five_degree_alert(data xyzData);

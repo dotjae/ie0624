@@ -133,3 +133,11 @@ data integrate_xyz(data xyzData)
 
     return xyzData;
 }
+
+void five_degree_alert(data xyzData)
+{
+        if (xyzData.angle.x > 5 || xyzData.angle.y > 5 || xyzData.angle.z > 5)
+        {
+		    gpio_toggle(GPIOG, GPIO13 | GPIO14);
+        }
+}
