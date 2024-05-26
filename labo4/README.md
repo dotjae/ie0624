@@ -65,7 +65,7 @@ Esta guía proporciona los pasos necesarios para compilar, cargar y acceder a la
 
 ### Acceso a la consola
 
-<details><summary><b>Show instructions</b></summary>
+<details><summary><b>Mostrar instrucciones</b></summary>
 
 1. Accede a la interfaz gráfica de la configuración de la consola.
     ```bash
