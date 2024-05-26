@@ -2,8 +2,8 @@
 
 int main(void)
 {   
-    char str[50];
     uint8_t temperature;
+    bool USART_enable = true;
 
     data xyzData;
     INIT_ANGLE(xyzData.angle);
@@ -15,6 +15,7 @@ int main(void)
     mems_spi_init();
 	sdram_init();
 	lcd_spi_init();
+    button_setup();
     gfx_init(lcd_draw_pixel, 240, 320); 
 
 	while (1) 
@@ -23,7 +24,7 @@ int main(void)
         xyzData.reading = read_xyz();
         xyzData = integrate_xyz(xyzData);
         
-        console_puts_angles(xyzData);       
-        lcd_slope(temperature, xyzData.reading);
+        USART_enable = console_usart_enable(xyzData, USART_enable);
+        lcd_slope(temperature, xyzData.reading, USART_enable);
 	}
 }

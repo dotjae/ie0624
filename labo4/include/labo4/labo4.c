@@ -1,6 +1,6 @@
 #include "labo4.h"
 
-void lcd_slope(uint8_t temperature, mems reading)
+void lcd_slope(uint8_t temperature, mems reading, bool USART_enable)
 {
     char buf[8];
 
@@ -49,25 +49,48 @@ void lcd_slope(uint8_t temperature, mems reading)
     gfx_puts(buf);
 
     gfx_setCursor(15, 175);
-    gfx_puts("COMM SERIAL: OFF");
-    
+    if (USART_enable)
+        gfx_puts("COMM SERIAL: ON");
+    else 
+        gfx_puts("COMM SERIAL: OFF");
+
     // Update screen
     lcd_show_frame();   
 }
 
+// Ojo con el buffer str
 void console_puts_slope(data xyzData)
 {
+    char buf[8];
+
     console_puts("\nAngulos:\n");
-    snprintf(str, sizeof(str), "%3.3f", xyzData.angle.x);
-    console_puts(str);
+    snprintf(buf, sizeof(buf), "%3.3f", xyzData.angle.x);
+    console_puts(buf);
     console_puts("\t");
-    snprintf(str, sizeof(str), "%3.3f", xyzData.angle.y);
-    console_puts(str);
+    snprintf(buf, sizeof(buf), "%3.3f", xyzData.angle.y);
+    console_puts(buf);
     console_puts("\t");
-    snprintf(str, sizeof(str), "%3.3f", xyzData.angle.z);
-    console_puts(str);
+    snprintf(buf, sizeof(buf), "%3.3f", xyzData.angle.z);
+    console_puts(buf);
     console_puts("\n");
 }
+
+
+bool console_usart_enable(data xyzData, bool USART_enable)
+{
+    if (gpio_get(GPIOA, GPIO0))
+    {
+        USART_enable = !USART_enable;
+        msleep(10);
+    }
+    if (USART_enable)
+    {
+        console_puts_slope(xyzData);       
+    }
+
+    return USART_enable;
+}
+
 void delay(void)
 {
     for (int i = 0; i < 6000000; i++) __asm__ ( "nop" );

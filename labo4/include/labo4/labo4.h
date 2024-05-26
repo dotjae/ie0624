@@ -2,12 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <stdbool.h>
 #include "clock.h"
 #include "console.h"
 #include "sdram.h"
 #include "lcd-spi.h"
 #include "gfx.h"
 #include "mems.h"
+#include "button.h"
 
 typedef struct Degree
 {
@@ -40,8 +42,9 @@ typedef struct memsData
 #define INIT_ANGLE(X) do { (X).x = 0; (X).y = 0; (X).z = 0; } while(0)
 #define INIT_SAMPLE_TIME(X) do { (X).x = mtime(); (X).y = mtime(); (X).z = mtime(); } while(0)
 
-void lcd_slope(uint8_t temperature, mems reading);
+void lcd_slope(uint8_t temperature, mems reading, bool USART_enable);
 void delay(void);
 integral integrate_axis(double reading, double angle, double lastSampleTime);
 data integrate_xyz(data xyzData);
 void console_puts_slope(data xyzData);
+bool console_usart_enable(data xyzData, bool USART_enable);
