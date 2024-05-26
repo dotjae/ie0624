@@ -47,21 +47,23 @@ Esta guía proporciona los pasos necesarios para compilar, cargar y acceder a la
     make
     ```
 
-### Subir el código y acceso a consola
+### Subir el código 
 
-1. Conecte la tarjeta STM32F29I-DISCOVERY a la PC por medio del cable USB Mini-B.
+1. Conecte la tarjeta STM32F429I-DISCOVERY a la PC por medio del cable USB Mini-B.
 
 2. Utiliza el comando `make flash` para subir el código al microcontrolador:
     ```bash
     make flash
     ```
 
-3. Accede a la interfaz gráfica de la configuración de la consola.
+### Acceso a la consola
+
+1. Accede a la interfaz gráfica de la configuración de la consola.
     ```bash
     sudo minicom -s
     ```
 
-4. Escoja `Configuración de puerto serie` y asegurese que tenga la siguiente configuración. `\dev\port` corresponde al puerto serial en donde está conectado el microcontrolador, puedes revisar a cual puerto está conectado tu microcontrolador con el comando `ls /dev`.
+2. Escoja `Configuración de puerto serie` y asegurese que tenga la siguiente configuración. `/dev/port` corresponde al puerto serial en donde está conectado el microcontrolador, puedes revisar a cual puerto está conectado tu microcontrolador con el comando `ls /dev`.
 ```
     +-----------------------------------------------------------------------+
     | A - Dispositivo Serie      : /dev/port                                |
