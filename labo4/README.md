@@ -16,6 +16,8 @@ Esta guía proporciona los pasos necesarios para compilar, cargar y acceder a la
 ## Uso
 ### Compilación
 
+<details><summary><b>Mostrar instrucciones</b></summary>
+
 1. Clona el repoistorio:
     ```bash
     git clone https://github.com/dotjae/ie0624.git
@@ -47,7 +49,11 @@ Esta guía proporciona los pasos necesarios para compilar, cargar y acceder a la
     make
     ```
 
+<details>
+
 ### Subir el código 
+
+<details><summary><b>Mostrar instrucciones</b></summary>
 
 1. Conecte la tarjeta STM32F429I-DISCOVERY a la PC por medio del cable USB Mini-B.
 
@@ -55,8 +61,10 @@ Esta guía proporciona los pasos necesarios para compilar, cargar y acceder a la
     ```bash
     make flash
     ```
-
+<details>
 ### Acceso a la consola
+
+<details><summary><b>Show instructions</b></summary>
 
 1. Accede a la interfaz gráfica de la configuración de la consola.
     ```bash
@@ -89,5 +97,7 @@ Esta guía proporciona los pasos necesarios para compilar, cargar y acceder a la
     ```bash
     sudo minicom
     ```
+
+<details>
 
 ---
