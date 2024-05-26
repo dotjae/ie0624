@@ -2,15 +2,16 @@
 
 ## Monitor de pendientes con STM32F429I-DISCOVERY
 
-Esta guía proporciona los pasos necesarios para compilar, cargar y acceder a la consola de una aplicación en la placa STM32F429-DISCOVERY.
+Esta guía proporciona los pasos necesarios para compilar, cargar y acceder a la consola de un monitor de pendientes implementado en la placa STM32F429I-DISCOVERY.
 
 ## Requisitos
 
-- STM32F429-DISCOVERY
+- STM32F429I-DISCOVERY
 - ST-Link
 - Toolchain de GCC ARM (gcc-arm-none-eabi)
-- minicom instalado en el sistema
+- minicom 
 - git
+- make
 
 ## Uso
 ### Compilación
@@ -20,7 +21,7 @@ Esta guía proporciona los pasos necesarios para compilar, cargar y acceder a la
     git clone https://github.com/dotjae/ie0624.git
     ```
 
-2. Navega al directorio `src` de tu proyecto:
+2. Navega al directorio `src`:
     ```bash
     cd src
     ```
@@ -47,6 +48,6 @@ Esta guía proporciona los pasos necesarios para compilar, cargar y acceder a la
     sudo minicom
     ```
 
-4. Para salir de la consola, presiona las teclas `CTRL+Shift+Z`.
+4. Para salir de la consola, presiona las teclas `CTRL+Shift+A+X`.
 
 ---
