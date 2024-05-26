@@ -94,10 +94,7 @@ Esta guía proporciona los pasos necesarios para compilar, cargar y acceder a la
     +-----------------------------------------------------------------------+
 ```
 
-3. Accede a la consola con `minicom`:
-    ```bash
-    sudo minicom
-    ```
+3. Regrese a la pantalla principal de `minicom` y seleccione `Salir` para acceder a la terminal serial.
 
 </details>
 
