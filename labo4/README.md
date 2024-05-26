@@ -20,23 +20,28 @@ Esta guía proporciona los pasos necesarios para compilar, cargar y acceder a la
     ```bash
     git clone https://github.com/dotjae/ie0624.git
     ```
+
 2. Inicializa el submódulo de [libopencm3](https://github.com/libopencm3/libopencm3)
     ```bash
     git submodule init
     git submodule update
     ```
+
 3. Navega al directorio `libopencm3`:
     ```bash
     cd libopencm3
     ```
+
 4. Construye la librería:
     ```bash
     make
     ```
+
 5. Navega al directorio `src`:
     ```bash
     cd ../src
     ```
+
 6. Compila el código:
     ```bash
     make
