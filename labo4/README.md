@@ -49,7 +49,7 @@ Esta guía proporciona los pasos necesarios para compilar, cargar y acceder a la
     make
     ```
 
-<details>
+</details>
 
 ### Subir el código 
 
@@ -61,7 +61,8 @@ Esta guía proporciona los pasos necesarios para compilar, cargar y acceder a la
     ```bash
     make flash
     ```
-<details>
+</details>
+
 ### Acceso a la consola
 
 <details><summary><b>Show instructions</b></summary>
@@ -98,6 +99,6 @@ Esta guía proporciona los pasos necesarios para compilar, cargar y acceder a la
     sudo minicom
     ```
 
-<details>
+</details>
 
 ---
