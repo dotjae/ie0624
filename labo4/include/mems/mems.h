@@ -6,7 +6,6 @@
 #include "clock.h"
 #include "console.h"
 
-
 // Misc
 #define WHO_AM_I    0xfh    // identifier reg
 #define RNW         0x80    // read reg from gyro
@@ -45,6 +44,7 @@
 #define L3GD20_SENSITIVITY_250DPS  (0.00875F)      // Roughly 22/256 for fixed point match
 #define L3GD20_SENSITIVITY_500DPS  (0.0175F)       // Roughly 45/256
 #define L3GD20_SENSITIVITY_2000DPS (0.070F)        // Roughly 18/256
+
 typedef struct Mems
 {
     int16_t x;

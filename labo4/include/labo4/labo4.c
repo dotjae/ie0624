@@ -55,7 +55,58 @@ void lcd_slope(uint8_t temperature, mems reading)
     lcd_show_frame();   
 }
 
+void console_puts_slope(data xyzData)
+{
+    console_puts("\nAngulos:\n");
+    snprintf(str, sizeof(str), "%3.3f", xyzData.angle.x);
+    console_puts(str);
+    console_puts("\t");
+    snprintf(str, sizeof(str), "%3.3f", xyzData.angle.y);
+    console_puts(str);
+    console_puts("\t");
+    snprintf(str, sizeof(str), "%3.3f", xyzData.angle.z);
+    console_puts(str);
+    console_puts("\n");
+}
 void delay(void)
 {
     for (int i = 0; i < 6000000; i++) __asm__ ( "nop" );
+}
+
+integral integrate_axis(double reading, double angle, double lastSampleTime)
+{
+    integral speed_integral;
+
+    if (fabs(reading) > 1 && (mtime() - lastSampleTime) > SAMPLE_TIME) 
+    {
+        double deltaT = ((double)mtime() - lastSampleTime) / 1000.0; 
+        angle += (double)fabs(reading) * deltaT;
+        lastSampleTime = mtime();
+    }
+    
+    speed_integral.angle = angle;
+    speed_integral.lastSampleTime = lastSampleTime;
+    return speed_integral;
+}
+
+data integrate_xyz(data xyzData)
+{
+    integral xIntegral;
+    integral yIntegral;
+    integral zIntegral;
+
+    xIntegral = integrate_axis(xyzData.reading.x, xyzData.angle.x, xyzData.lastTime.x); // x integration
+    yIntegral = integrate_axis(xyzData.reading.y, xyzData.angle.y, xyzData.lastTime.y); // y integration
+    zIntegral = integrate_axis(xyzData.reading.z, xyzData.angle.z, xyzData.lastTime.z); // z integration
+    
+    xyzData.angle.x = xIntegral.angle;
+    xyzData.lastTime.x = xIntegral.lastSampleTime;
+
+    xyzData.angle.y = yIntegral.angle;
+    xyzData.lastTime.y = yIntegral.lastSampleTime;
+
+    xyzData.angle.z = zIntegral.angle;
+    xyzData.lastTime.z = zIntegral.lastSampleTime;
+
+    return xyzData;
 }
