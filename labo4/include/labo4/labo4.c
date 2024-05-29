@@ -1,6 +1,6 @@
 #include "labo4.h"
 
-void lcd_slope(uint8_t temperature, mems reading, bool USART_enable)
+void lcd_slope(uint8_t temperature, degree reading, uint16_t battery, bool USART_enable)
 {
     char buf[8];
 
@@ -22,7 +22,10 @@ void lcd_slope(uint8_t temperature, mems reading, bool USART_enable)
     // XYZ axis, temperature, battery level
     gfx_setTextSize(1);
     gfx_setCursor(15, 100);
-    gfx_puts("BATERIA: 00%");
+    gfx_puts("BATERIA:");
+    gfx_setCursor(105, 100);
+    sprintf(buf, "%d", battery);
+    gfx_puts(buf);
 
     gfx_setCursor(15, 115);
     gfx_puts("TEMPERATURA: ");
@@ -33,19 +36,19 @@ void lcd_slope(uint8_t temperature, mems reading, bool USART_enable)
     gfx_setCursor(15, 130);
     gfx_puts("EJE X: ");
     gfx_setCursor(65, 130);
-    sprintf(buf, "%3d", reading.x);
+    sprintf(buf, "%3f", reading.x);
     gfx_puts(buf);
 
     gfx_setCursor(15, 145);
     gfx_puts("EJE Y: ");
     gfx_setCursor(65, 145);
-    sprintf(buf, "%3d", reading.y);
+    sprintf(buf, "%3f", reading.y);
     gfx_puts(buf);
 
     gfx_setCursor(15, 160);
     gfx_puts("EJE Z: ");
     gfx_setCursor(65, 160);
-    sprintf(buf, "%3d", reading.z);
+    sprintf(buf, "%3f", reading.z);
     gfx_puts(buf);
 
     gfx_setCursor(15, 175);
@@ -75,8 +78,32 @@ void console_puts_slope(data xyzData)
     console_puts("\n");
 }
 
+void console_puts_temperature(uint8_t temperature)
+{
+    char buf[8];
 
-bool console_usart_enable(data xyzData, bool USART_enable)
+    console_puts("\nTemperatura:\n");
+    snprintf(buf, sizeof(buf), "%d", temperature);
+    console_puts(buf);
+    console_puts("\n");
+    // console_puts("\t");
+
+}
+
+void console_puts_battery(uint16_t battery)
+{
+    char buf[100];
+
+    console_puts("\nBateria:\n");
+    snprintf(buf, sizeof(buf), "%d", battery);
+    console_puts(buf);
+    console_puts("\n");
+    // console_puts("\t");
+
+}
+
+
+bool console_usart_enable(data xyzData, uint8_t temperature, uint16_t battery, bool USART_enable)
 {
     if (gpio_get(GPIOA, GPIO0))
     {
@@ -85,7 +112,10 @@ bool console_usart_enable(data xyzData, bool USART_enable)
     }
     if (USART_enable)
     {
-        console_puts_slope(xyzData);       
+        console_puts_slope(xyzData);  
+        // delay();
+        console_puts_temperature(temperature);     
+        console_puts_battery(battery);
     }
 
     return USART_enable;
