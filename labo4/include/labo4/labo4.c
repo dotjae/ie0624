@@ -2,7 +2,7 @@
 
 void lcd_slope(uint8_t temperature, degree reading, uint16_t battery, bool USART_enable)
 {
-    char buf[8];
+    char buf[21];
 
     // interface
     gfx_fillScreen(LCD_BLACK);
@@ -66,7 +66,7 @@ void console_puts_slope(data xyzData)
 {
     char buf[8];
 
-    console_puts("\nAngulos:\n");
+    // console_puts("\nAngulos:\n");
     snprintf(buf, sizeof(buf), "%3.3f", xyzData.angle.x);
     console_puts(buf);
     console_puts("\t");
@@ -78,27 +78,52 @@ void console_puts_slope(data xyzData)
     console_puts("\n");
 }
 
+void console_puts_all(data xyzData, uint8_t temperature, uint16_t battery)
+{
+    char buf[21];
+    // int TEST = 0;
+
+    // console_puts("\nAngulos:\n");
+    // snprintf(buf, sizeof(buf), "%d", TEST);
+    // console_puts(buf);
+    snprintf(buf, sizeof(buf), "%3.3f", xyzData.angle.x);
+    console_puts(buf);
+    console_puts("\t");
+    snprintf(buf, sizeof(buf), "%3.3f", xyzData.angle.y);
+    console_puts(buf);
+    console_puts("\t");
+    snprintf(buf, sizeof(buf), "%3.3f", xyzData.angle.z);
+    console_puts(buf);
+    console_puts("\t");
+    snprintf(buf, sizeof(buf), "%3d", temperature);
+    console_puts(buf);
+    console_puts("\t");
+    snprintf(buf, sizeof(buf), "%4d", battery);
+    console_puts(buf);
+    console_puts("\n");
+}
+
 void console_puts_temperature(uint8_t temperature)
 {
     char buf[8];
 
-    console_puts("\nTemperatura:\n");
+    // console_puts("\nTemperatura:\n");
     snprintf(buf, sizeof(buf), "%d", temperature);
     console_puts(buf);
     console_puts("\n");
-    // console_puts("\t");
+    console_puts("\t");
 
 }
 
 void console_puts_battery(uint16_t battery)
 {
-    char buf[100];
+    char buf[8];
 
-    console_puts("\nBateria:\n");
+    // console_puts("\nBateria:\n");
     snprintf(buf, sizeof(buf), "%d", battery);
     console_puts(buf);
     console_puts("\n");
-    // console_puts("\t");
+    console_puts("\t");
 
 }
 
@@ -112,10 +137,7 @@ bool console_usart_enable(data xyzData, uint8_t temperature, uint16_t battery, b
     }
     if (USART_enable)
     {
-        console_puts_slope(xyzData);  
-        // delay();
-        console_puts_temperature(temperature);     
-        console_puts_battery(battery);
+        console_puts_all(xyzData, temperature, battery);
     }
 
     return USART_enable;
@@ -168,6 +190,17 @@ void five_degree_alert(data xyzData)
 {
         if (xyzData.angle.x > 5 || xyzData.angle.y > 5 || xyzData.angle.z > 5)
         {
-		    gpio_toggle(GPIOG, GPIO13 | GPIO14);
+		    gpio_toggle(GPIOG, GPIO13);
+        }
+}
+
+void low_battery_alert(uint16_t battery)
+{
+        if (battery < 20)
+        {
+		    gpio_toggle(GPIOG, GPIO14);
+        }
+        else {
+            gpio_clear(GPIOG, GPIO14);
         }
 }

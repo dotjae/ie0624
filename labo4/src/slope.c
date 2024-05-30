@@ -29,11 +29,11 @@ int main(void)
         temperature = mems_temp();
         xyzData.reading = read_xyz();
         xyzData = integrate_xyz(xyzData);
-        // battery = get_battery(0);
         battery = get_battery(0);
-        // battery = 20;
+
 
         five_degree_alert(xyzData);
+        low_battery_alert(battery);
         USART_enable = console_usart_enable(xyzData, temperature, battery, USART_enable);
         lcd_slope(temperature, xyzData.angle, battery, USART_enable);
 

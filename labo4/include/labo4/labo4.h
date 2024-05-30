@@ -54,3 +54,6 @@ void five_degree_alert(data xyzData);
 
 void console_puts_temperature(uint8_t temperature);
 void console_puts_battery(uint16_t battery);
+
+void console_puts_all(data xyzData, uint8_t temperature, uint16_t battery);
+void low_battery_alert(uint16_t battery);
