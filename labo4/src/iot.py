@@ -12,7 +12,7 @@ port = 1883
 topic = "v1/devices/me/telemetry"
 topicreq = "v1/devices/me/attributes/request/1/"
 username = "urtcz88waqo9wjzbknpa"
-password = ""
+
 
 # Callback when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
@@ -26,8 +26,8 @@ def on_message(client, userdata, msg):
 # Create an MQTT client instance
 client = mqtt.Client()
 
-# Set username and password
-client.username_pw_set(username, password)
+# Authenticate
+client.username_pw_set(username)
 
 # Assign event callbacks
 client.on_connect = on_connect
@@ -43,7 +43,8 @@ client.loop_start()
 ser = serial.Serial(f'{PORT}', 115200)
 
 # Dictionary to send data to ThingsBoard
-data_dict = {'temp': 0, 'x':0, 'y':0, 'z':0, 'bat':0}
+data_dict = {'temp': 0, 'x':0, 'y':0, 'z':0, 'bat':0, 'low_bat':"", "deg_alert": ""}
+deg_alert = False
 
 try:
     while True:
@@ -61,25 +62,30 @@ try:
                 continue
 
             # Element variables
-            x = dsplit[0]
-            y = dsplit[1]
-            z = dsplit[2]
-            temp = dsplit[3]
-            batt = dsplit[4]
+            x = float(dsplit[0])
+            y = float(dsplit[1])
+            z = float(dsplit[2])
+            temp = int(dsplit[3])
+            batt = float(dsplit[4])*100/9
+            deg_alert = True if x > 5 or y > 5 or z > 5 else False
+
+
 
             # Assign elements to dictionary
-            data_dict['x'] = float(x)
-            data_dict['y'] = float(y)
-            data_dict['z'] = float(z)
-            data_dict['temp'] = int(temp)
-            data_dict['bat'] = int(batt)        
-           
+            data_dict['x'] = x
+            data_dict['y'] = y
+            data_dict['z'] = z
+            data_dict['temp'] = temp
+            data_dict['bat'] = batt
+            data_dict['low_bat'] = "Full Battery" if batt >= 90 else "Low Battery" if batt < 80 else "Medium Battery" 
+            data_dict['deg_alert'] = "Danger!" if deg_alert else "All good."           
+            
             # Publish the telemetry data
             client.publish(topic, json.dumps(data_dict))
             print(f"Sent telemetry data: {data_dict}")
 
             # Wait a small period before sending the next data
-            time.sleep(0.5)
+            time.sleep(0.1)
         
 except KeyboardInterrupt:
     print("\nExiting program.")
