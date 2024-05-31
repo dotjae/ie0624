@@ -1,12 +1,9 @@
 #include "labo4.h"
 
-#define LED_DISCO_GREEN_PORT GPIOD
-#define LED_DISCO_GREEN_PIN GPIO12
-
 int main(void)
 {   
     uint8_t temperature;
-    uint16_t battery;
+    double battery;
     bool USART_enable = true;
 
     data xyzData;
@@ -29,14 +26,12 @@ int main(void)
         temperature = mems_temp();
         xyzData.reading = read_xyz();
         xyzData = integrate_xyz(xyzData);
-        battery = get_battery(0);
+        battery = get_battery(5);
 
 
         five_degree_alert(xyzData);
         low_battery_alert(battery);
         USART_enable = console_usart_enable(xyzData, temperature, battery, USART_enable);
         lcd_slope(temperature, xyzData.angle, battery, USART_enable);
-
-        gpio_toggle(LED_DISCO_GREEN_PORT, LED_DISCO_GREEN_PIN);
 	}
 }

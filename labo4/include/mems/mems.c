@@ -80,9 +80,9 @@ int16_t read_axis(uint8_t reg_low, uint8_t reg_high)
 mems read_xyz(void) {
     mems reading;
     
-    reading.x = (read_axis(OUT_X_L | RNW, OUT_X_H | RNW) * L3GD20_SENSITIVITY_250DPS) + 5;
-    reading.y = (read_axis(OUT_Y_L | RNW, OUT_Y_H | RNW) * L3GD20_SENSITIVITY_250DPS) - 17;
-    reading.z = (read_axis(OUT_Z_L | RNW, OUT_Z_H | RNW) * L3GD20_SENSITIVITY_250DPS) + 17;
+    reading.x = (read_axis(OUT_X_L | RNW, OUT_X_H | RNW) * L3GD20_SENSITIVITY_250DPS);
+    reading.y = (read_axis(OUT_Y_L | RNW, OUT_Y_H | RNW) * L3GD20_SENSITIVITY_250DPS);
+    reading.z = (read_axis(OUT_Z_L | RNW, OUT_Z_H | RNW) * L3GD20_SENSITIVITY_250DPS);
 
     return reading;
 }
