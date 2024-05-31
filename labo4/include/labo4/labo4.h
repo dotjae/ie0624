@@ -45,15 +45,17 @@ typedef struct memsData
 #define INIT_SAMPLE_TIME(X) do { (X).x = mtime(); (X).y = mtime(); (X).z = mtime(); } while(0)
 
 void lcd_slope(uint8_t temperature, degree reading, uint16_t battery, bool USART_enable);
-void delay(void);
-integral integrate_axis(double reading, double angle, double lastSampleTime);
-data integrate_xyz(data xyzData);
-void console_puts_slope(data xyzData);
-bool console_usart_enable(data xyzData, uint8_t temperature, uint16_t battery, bool USART_enable);
-void five_degree_alert(data xyzData);
 
-void console_puts_temperature(uint8_t temperature);
-void console_puts_battery(uint16_t battery);
+void delay(void);
+
+integral integrate_axis(double reading, double angle, double lastSampleTime);
+
+data integrate_xyz(data xyzData);
+
+bool console_usart_enable(data xyzData, uint8_t temperature, uint16_t battery, bool USART_enable);
 
 void console_puts_all(data xyzData, uint8_t temperature, uint16_t battery);
+
+void five_degree_alert(data xyzData);
+
 void low_battery_alert(uint16_t battery);

@@ -1,10 +1,21 @@
 #include "labo4.h"
 
+/**
+ * @brief Displays temperature, battery level, and sensor readings on the LCD.
+ *
+ * This function sets up the LCD screen interface, draws shapes and text for displaying the current temperature, battery level, and sensor readings. It also shows the status of serial communication.
+ *
+ * @param temperature The current temperature value to display.
+ * @param reading The current readings of the XYZ axis.
+ * @param battery The current battery level to display.
+ * @param USART_enable Boolean indicating whether serial communication is enabled.
+ * @return void This function does not return any values.
+ */
 void lcd_slope(uint8_t temperature, degree reading, uint16_t battery, bool USART_enable)
 {
     char buf[21];
 
-    // interface
+    // Interface 
     gfx_fillScreen(LCD_BLACK);
     gfx_fillRoundRect(10, 10, 220, 220, 5, LCD_WHITE);
     gfx_drawRoundRect(10, 10, 220, 220, 5, LCD_RED);
@@ -51,6 +62,7 @@ void lcd_slope(uint8_t temperature, degree reading, uint16_t battery, bool USART
     sprintf(buf, "%3f", reading.z);
     gfx_puts(buf);
 
+    // Serial communication
     gfx_setCursor(15, 175);
     if (USART_enable)
         gfx_puts("COMM SERIAL: ON");
@@ -61,31 +73,20 @@ void lcd_slope(uint8_t temperature, degree reading, uint16_t battery, bool USART
     lcd_show_frame();   
 }
 
-// Ojo con el buffer str
-void console_puts_slope(data xyzData)
-{
-    char buf[8];
-
-    // console_puts("\nAngulos:\n");
-    snprintf(buf, sizeof(buf), "%3.3f", xyzData.angle.x);
-    console_puts(buf);
-    console_puts("\t");
-    snprintf(buf, sizeof(buf), "%3.3f", xyzData.angle.y);
-    console_puts(buf);
-    console_puts("\t");
-    snprintf(buf, sizeof(buf), "%3.3f", xyzData.angle.z);
-    console_puts(buf);
-    console_puts("\n");
-}
-
+/**
+ * @brief Sends all sensor data to the console.
+ *
+ * This function formats and sends the XYZ axis readings, temperature, and battery level to the console.
+ *
+ * @param xyzData The current readings of the XYZ axis.
+ * @param temperature The current temperature value.
+ * @param battery The current battery level.
+ * @return void This function does not return any values.
+ */
 void console_puts_all(data xyzData, uint8_t temperature, uint16_t battery)
 {
     char buf[21];
-    // int TEST = 0;
 
-    // console_puts("\nAngulos:\n");
-    // snprintf(buf, sizeof(buf), "%d", TEST);
-    // console_puts(buf);
     snprintf(buf, sizeof(buf), "%3.3f", xyzData.angle.x);
     console_puts(buf);
     console_puts("\t");
@@ -103,31 +104,17 @@ void console_puts_all(data xyzData, uint8_t temperature, uint16_t battery)
     console_puts("\n");
 }
 
-void console_puts_temperature(uint8_t temperature)
-{
-    char buf[8];
-
-    // console_puts("\nTemperatura:\n");
-    snprintf(buf, sizeof(buf), "%d", temperature);
-    console_puts(buf);
-    console_puts("\n");
-    console_puts("\t");
-
-}
-
-void console_puts_battery(uint16_t battery)
-{
-    char buf[8];
-
-    // console_puts("\nBateria:\n");
-    snprintf(buf, sizeof(buf), "%d", battery);
-    console_puts(buf);
-    console_puts("\n");
-    console_puts("\t");
-
-}
-
-
+/**
+ * @brief Toggles USART communication and sends data if enabled.
+ *
+ * This function checks if the button is pressed to toggle the USART communication state. If enabled, it sends all sensor data to the console.
+ *
+ * @param xyzData The current readings of the XYZ axis.
+ * @param temperature The current temperature value.
+ * @param battery The current battery level.
+ * @param USART_enable Boolean indicating whether serial communication is enabled.
+ * @return bool The updated state of the USART communication.
+ */
 bool console_usart_enable(data xyzData, uint8_t temperature, uint16_t battery, bool USART_enable)
 {
     if (gpio_get(GPIOA, GPIO0))
@@ -143,11 +130,29 @@ bool console_usart_enable(data xyzData, uint8_t temperature, uint16_t battery, b
     return USART_enable;
 }
 
+/**
+ * @brief Introduces a delay in the program execution.
+ *
+ * This function implements a simple delay using a for loop and NOP instructions.
+ *
+ * @param void This function does not take any parameters.
+ * @return void This function does not return any values.
+ */
 void delay(void)
 {
     for (int i = 0; i < 6000000; i++) __asm__ ( "nop" );
 }
 
+/**
+ * @brief Integrates the reading of a single axis over time.
+ *
+ * This function calculates the integral of the reading of a single axis over time to estimate the angle.
+ *
+ * @param reading The current reading of the axis.
+ * @param angle The current angle of the axis.
+ * @param lastSampleTime The time of the last sample.
+ * @return integral The integrated angle and updated sample time.
+ */
 integral integrate_axis(double reading, double angle, double lastSampleTime)
 {
     integral speed_integral;
@@ -164,6 +169,14 @@ integral integrate_axis(double reading, double angle, double lastSampleTime)
     return speed_integral;
 }
 
+/**
+ * @brief Integrates the readings of all XYZ axes over time.
+ *
+ * This function calculates the integral of the readings of all XYZ axes over time to estimate the angles.
+ *
+ * @param xyzData The current readings and angles of the XYZ axes.
+ * @return data The updated readings and angles of the XYZ axes.
+ */
 data integrate_xyz(data xyzData)
 {
     integral xIntegral;
@@ -186,6 +199,14 @@ data integrate_xyz(data xyzData)
     return xyzData;
 }
 
+/**
+ * @brief Toggles an alert if any axis exceeds a 5-degree angle.
+ *
+ * This function checks if any of the XYZ axis angles exceed 5 degrees and toggles a GPIO pin to signal an alert.
+ *
+ * @param xyzData The current angles of the XYZ axes.
+ * @return void This function does not return any values.
+ */
 void five_degree_alert(data xyzData)
 {
         if (xyzData.angle.x > 5 || xyzData.angle.y > 5 || xyzData.angle.z > 5)
@@ -194,6 +215,14 @@ void five_degree_alert(data xyzData)
         }
 }
 
+/**
+ * @brief Toggles an alert if the battery level is low.
+ *
+ * This function checks if the battery level is below 20% and toggles a GPIO pin to signal a low battery alert.
+ *
+ * @param battery The current battery level.
+ * @return void This function does not return any values.
+ */
 void low_battery_alert(uint16_t battery)
 {
         if (battery < 20)
