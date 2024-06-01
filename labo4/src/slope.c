@@ -23,15 +23,20 @@ int main(void)
 
 	while (1) 
     {   
+        // Get readings
         temperature = mems_temp();
         xyzData.reading = read_xyz();
         xyzData = integrate_xyz(xyzData);
-        battery = get_battery(5);
+        battery = get_battery(5); // Use channel 5
 
-
+        // Setup alert LEDs
         five_degree_alert(xyzData);
         low_battery_alert(battery);
-        USART_enable = console_usart_enable(xyzData, temperature, battery, USART_enable);
-        lcd_slope(temperature, xyzData.angle, battery, USART_enable);
+
+        // Send serial data
+        USART_enable = console_usart_enable(xyzData, temperature, battery, USART_enable); 
+
+        // Send serial data
+        lcd_slope(temperature, xyzData.angle, battery, USART_enable); 
 	}
 }

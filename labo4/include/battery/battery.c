@@ -1,6 +1,14 @@
 #include "battery.h"
 #include <libopencm3/stm32/rcc.h>
 
+/**
+ * @brief Configures the ADC for analog input.
+ *
+ * This function enables the ADC1 peripheral clock, sets up the GPIO pin for analog input, and configures the ADC with a specified sample time.
+ *
+ * @param void This function does not take any parameters.
+ * @return void This function does not return any values.
+ */
 void adc_setup(void)
 {
 	rcc_periph_clock_enable(RCC_ADC1);
@@ -11,6 +19,14 @@ void adc_setup(void)
 	adc_power_on(ADC1);
 }
 
+/**
+ * @brief Reads an ADC value from a specified channel.
+ *
+ * This function performs an ADC conversion on the specified channel and returns the result.
+ *
+ * @param channel The ADC channel to read from.
+ * @return uint16_t The ADC conversion result.
+ */
 uint16_t read_adc_naiive(uint8_t channel)
 {
 	uint8_t channel_array[16];
@@ -23,7 +39,14 @@ uint16_t read_adc_naiive(uint8_t channel)
 	return reg16;
 }
 
-
+/**
+ * @brief Reads the battery voltage.
+ *
+ * This function reads the ADC value from the specified channel and converts it to a battery voltage level.
+ *
+ * @param channel The ADC channel to read from.
+ * @return double The battery voltage.
+ */
 double get_battery(uint8_t channel)
 {
     return (double)read_adc_naiive(channel) * (9.0/4096.0);
@@ -32,7 +55,7 @@ double get_battery(uint8_t channel)
 /**
  * @brief Toggles an alert if the battery level is low.
  *
- * This function checks if the battery level is below 20% and toggles a GPIO pin to signal a low battery alert.
+ * This function checks if the battery level is below 7V and toggles a GPIO pin to signal a low battery alert.
  *
  * @param battery The current battery level.
  * @return void This function does not return any values.
