@@ -98,8 +98,6 @@ Esta guía proporciona los pasos necesarios para compilar, cargar y acceder a la
 
 </details>
 
----
-
 ### Comucación con ThingsBoard
 <details><summary><b>Mostrar instrucciones</b></summary>
 
@@ -115,3 +113,5 @@ Esta guía proporciona los pasos necesarios para compilar, cargar y acceder a la
 
 
 </details>
+
+---
