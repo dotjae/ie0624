@@ -99,3 +99,19 @@ Esta guía proporciona los pasos necesarios para compilar, cargar y acceder a la
 </details>
 
 ---
+
+### Comucación con ThingsBoard
+<details><summary><b>Mostrar instrucciones</b></summary>
+
+1. Asegúrese de tener Python instalado y que la tarjeta STM se encuentre conectada a la PC por medio del cable USB Mini-B.
+
+2. En el directorio `src` utilice el siguiente comando:
+    ```bash
+    python3 iot.py /dev/port
+    ```
+    donde `/dev/port` corresponde al puerto serial en donde está conectado el microcontrolador, puedes revisar a cual puerto está conectado tu microcontrolador con el comando `ls /dev`.
+
+3. Ingrese a https://iot.eie.ucr.ac.cr/dashboards/, identifíquese de ser necesario, y seleccione el Dashboard llamado "RJ". Mientras el script esté corriendo se actualizarán los _widgets_ en tiempo real, siempre y cuando la comunicación serial se encuentre encendida en el microcontrolador.
+
+
+</details>
