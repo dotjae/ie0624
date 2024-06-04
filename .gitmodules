@@ -1,3 +1,6 @@
 [submodule "labo4/libopencm3"]
 	path = labo4/libopencm3
 	url = https://github.com/libopencm3/libopencm3.git
+[submodule "proyecto/libopencm3"]
+	path = proyecto/libopencm3
+	url = https://github.com/libopencm3/libopencm3.git
