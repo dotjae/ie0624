@@ -20,7 +20,7 @@
  */
 void msleep(uint32_t);
 uint32_t mtime(void);
-void clock_setup(void);
+void clock_init(void);
 
 #endif /* generic header protector */
 

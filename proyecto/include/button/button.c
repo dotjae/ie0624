@@ -8,7 +8,7 @@
  * @param void This function does not take any parameters.
  * @return void This function does not return any values.
  */
-void button_setup(void)
+void button_init(void)
 {
 	/* Enable GPIOG clock. */
 	rcc_periph_clock_enable(RCC_GPIOG);

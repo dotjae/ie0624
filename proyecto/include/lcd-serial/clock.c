@@ -53,13 +53,13 @@ uint32_t mtime(void)
 }
 
 /*
- * clock_setup(void)
+ * clock_init(void)
  *
  * This function sets up both the base board clock rate
  * and a 1khz "system tick" count. The SYSTICK counter is
  * a standard feature of the Cortex-M series.
  */
-void clock_setup(void)
+void clock_init(void)
 {
 	/* Base board frequency, set to 168Mhz */
 	rcc_clock_setup_pll(&rcc_hse_8mhz_3v3[RCC_CLOCK_3V3_168MHZ]);

@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #include "clock.h"
 #include "console.h"
 #include "sdram.h"

@@ -168,12 +168,12 @@ int console_gets(char *s, int len)
 }
 
 /*
- * console_setup(int baudrate)
+ * console_init(int baudrate)
  *
  * Set the pins and clocks to create a console that we can
  * use for serial messages and getting text from the user.
  */
-void console_setup(int baud)
+void console_init(int baud)
 {
 
 	/* MUST enable the GPIO clock in ADDITION to the USART clock */
