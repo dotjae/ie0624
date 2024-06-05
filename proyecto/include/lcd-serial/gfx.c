@@ -43,7 +43,7 @@
 #include "gfx.h"
 #include "font-7x12.c"
 
-#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
+#define pgm_read_word(addr) (*(const uint16_t *)(addr))
 
 struct gfx_state __gfx_state;
 
@@ -398,19 +398,13 @@ void gfx_fillTriangle(int16_t x0, int16_t y0,
 }
 
 void gfx_drawBitmap(int16_t x, int16_t y,
-		    const uint8_t *bitmap, int16_t w, int16_t h,
-		    uint16_t color)
+		    const uint16_t *bitmap, int16_t w, int16_t h)
 {
-	int16_t i, j, byteWidth = (w + 7) / 8;
-
-	for (j = 0; j < h; j++) {
-		for (i = 0; i < w; i++) {
-			if (pgm_read_byte(bitmap + j * byteWidth + i / 8) &
-					 (128 >> (i & 7))) {
-				gfx_drawPixel(x + i, y + j, color);
+	for (int16_t j = 0; j < h; j++) {
+		for (int16_t i = 0; i < w; i++) {
+				gfx_drawPixel(x + i, y + j, pgm_read_word(&bitmap[j * w + i]));
 			}
 		}
-	}
 }
 
 void gfx_write(uint8_t c)

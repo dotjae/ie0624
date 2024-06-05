@@ -4,5 +4,6 @@
 #include "lcd-spi.h"
 #include "gfx.h"
 #include "button.h"
+#include "images.h"
 
 #define LINE_HEIGHT 15

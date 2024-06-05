@@ -125,7 +125,7 @@ static const uint8_t cmd_args[] = {
 	0x45, 0x15,
 	0x90,
 /*    0xc8,*/                 /* original */
-/*                  11001000 = MY, MX, BGR */
+/*                  11000000 = MY, MX, RGB */
 	0xa8,   /* rotar 90 grados para landscape de pong, MvMxMy = 101 pg 209 ILI9341 */
 	0xc2,
 	0x55,
@@ -214,20 +214,9 @@ initialize_display(const struct tft_command cmds[])
 	// console_puts("Done.\n");
 }
 
-/* prototype for test_image */
+/*
 static void test_image(void);
 
-/*
- * Interesting questions:
- *   - How quickly can I write a full frame?
- *      * Take the bits sent (16 * width * height)
- *        and divide by the  baud rate (10.25Mhz)
- *      * Tests in main.c show that yes, it taks 74ms.
- *
- * Create non-random data in the frame buffer. In our case
- * a black background and a grid 16 pixels x 16 pixels of
- * white lines. No line on the right edge and bottom of screen.
- */
 static void
 test_image(void)
 {
@@ -236,17 +225,18 @@ test_image(void)
 
 	for (x = 0; x < LCD_WIDTH; x++) {
 		for (y = 0; y < LCD_HEIGHT; y++) {
-			pixel = 0;			/* all black */
+			pixel = 0;	
 			if ((x % 16) == 0) {
-				pixel = 0xffff;		/* all white */
+				pixel = 0xffff;	
 			}
 			if ((y % 16) == 0) {
-				pixel = 0xffff;		/* all white */
+				pixel = 0xffff;
 			}
 			lcd_draw_pixel(x, y, pixel);
 		}
 	}
 }
+*/
 
 /*
  * void lcd_show_frame(void)
@@ -330,8 +320,6 @@ lcd_spi_init(void)
 
 	/* create a test image */
 	// console_puts("Generating Test Image\n");
-	// test_image();
-
 	/* display it on the LCD */
 	
 	lcd_show_frame();

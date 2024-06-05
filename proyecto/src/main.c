@@ -28,6 +28,13 @@ int main(void) {
         gfx_puts_centered("Estudiantes:",                   currentY += LINE_HEIGHT);
         gfx_puts_centered("Jose Flores Q.  B82994",         currentY += LINE_HEIGHT);
         gfx_puts_centered("Roger Piovet G. C15990",         currentY += LINE_HEIGHT);
+
+        gfx_drawPixel(160,120,GFX_COLOR_RED);
+        gfx_drawPixel(161,120,GFX_COLOR_RED);
+        gfx_drawPixel(162,120,GFX_COLOR_RED);
+        gfx_drawPixel(163,120,GFX_COLOR_RED);
+        gfx_drawPixel(164,120,GFX_COLOR_RED);
+        gfx_drawBitmap(0,0,image_data_chiles,320,240);
         lcd_show_frame();
     }
 }
