@@ -6,4 +6,6 @@
 #include "gfx.h"
 #include "images.h"
 
+#define LINE_HEIGHT 20
+
 void menu_fsm(void);

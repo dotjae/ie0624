@@ -19,6 +19,7 @@ typedef enum
 gameState STATE = MAIN_MENU;    // Show menu at POR
 selState MENU_STATE = SEL_PVP;  // Select PVP at POR
 
+uint16_t currentY;
 uint16_t cycleEnum          = 0;
 uint16_t pressedDuration    = 0;
 uint32_t pressedTime        = 0;
@@ -53,7 +54,7 @@ void menu_fsm(void)
                 
                 if (pressedDuration > 1000)
                 {
-                    gpio_toggle(GPIOG, GPIO13); // Blink led = select current option (wip)
+                    STATE = (MENU_STATE == SEL_PVP) ? PVP: GIT;
                 }
                 else
                 {
@@ -79,8 +80,36 @@ void menu_fsm(void)
             }
         break;
         case PVP:
+            gfx_fillScreen(LCD_BLACK);
+            gfx_setTextSize(4);
+            gfx_setTextColor(LCD_WHITE,LCD_BLACK);
+            gfx_puts_centered("WIP", LCD_HEIGHT/2);
+            lcd_show_frame();
+            msleep(3000);
+            STATE = MAIN_MENU;
         break;
         case GIT:
+            gfx_fillScreen(LCD_BLACK);
+            gfx_setTextSize(1);
+            gfx_setTextColor(LCD_WHITE,LCD_BLACK);
+            currentY = 0;
+            gfx_puts_centered("Universidad de Costa Rica",      currentY += LINE_HEIGHT);
+            gfx_puts_centered("Facultad de Ingenieria",         currentY += LINE_HEIGHT);
+            gfx_puts_centered("Escuela de Ingenieria Electrica",currentY += LINE_HEIGHT);
+            gfx_puts_centered("IE0624 Laboratorio de",          currentY += LINE_HEIGHT);
+            gfx_puts_centered("Microcontroladores, I-2024",     currentY += LINE_HEIGHT);
+            gfx_puts_centered("Proyecto de microcontroladores", currentY += LINE_HEIGHT);
+            gfx_puts_centered("Profesor:",                      currentY += LINE_HEIGHT);
+            gfx_puts_centered("MSc. Marco Villalta F.",         currentY += LINE_HEIGHT);
+            gfx_puts_centered("Estudiantes:",                   currentY += LINE_HEIGHT);
+            gfx_puts_centered("Jose Flores Q.  B82994",         currentY += LINE_HEIGHT);
+            gfx_puts_centered("Roger Piovet G. C15990",         currentY += LINE_HEIGHT);
+            lcd_show_frame();
+            msleep(10000);
+            gfx_drawBitmap(0,0,qr.data,qr.width,qr.height);
+            lcd_show_frame();
+            msleep(10000);
+            STATE = MAIN_MENU;
         break;
     }
 }

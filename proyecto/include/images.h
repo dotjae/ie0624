@@ -30,3 +30,6 @@ extern const tImage mu;
 
 // 'Inicio(PvP)'
 extern const tImage pvp;
+
+// QR
+extern const tImage qr;
