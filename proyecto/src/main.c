@@ -10,31 +10,7 @@ int main(void) {
     
     int16_t currentY;
     while (1) {
-        gfx_fillScreen(LCD_BLACK);
-        gfx_setTextSize(3);
-        gfx_setTextColor(LCD_WHITE, LCD_BLACK);
-        gfx_puts_centered("&Pong", LCD_HEIGHT * 1/16);  // 38 = '&' -> mu, mapeado en font-7x12.c
-
-        gfx_setTextSize(1);
-        currentY = gfx_Y() + 35;
-        gfx_puts_centered("Universidad de Costa Rica",      currentY += LINE_HEIGHT);
-        gfx_puts_centered("Facultad de Ingenieria",         currentY += LINE_HEIGHT);
-        gfx_puts_centered("Escuela de Ingenieria Electrica",currentY += LINE_HEIGHT);
-        gfx_puts_centered("IE0624 Laboratorio de",          currentY += LINE_HEIGHT);
-        gfx_puts_centered("Microcontroladores, I-2024",     currentY += LINE_HEIGHT);
-        gfx_puts_centered("Proyecto de microcontroladores", currentY += LINE_HEIGHT);
-        gfx_puts_centered("Profesor:",                      currentY += LINE_HEIGHT);
-        gfx_puts_centered("MSc. Marco Villalta F.",         currentY += LINE_HEIGHT);
-        gfx_puts_centered("Estudiantes:",                   currentY += LINE_HEIGHT);
-        gfx_puts_centered("Jose Flores Q.  B82994",         currentY += LINE_HEIGHT);
-        gfx_puts_centered("Roger Piovet G. C15990",         currentY += LINE_HEIGHT);
-
-        gfx_drawPixel(160,120,GFX_COLOR_RED);
-        gfx_drawPixel(161,120,GFX_COLOR_RED);
-        gfx_drawPixel(162,120,GFX_COLOR_RED);
-        gfx_drawPixel(163,120,GFX_COLOR_RED);
-        gfx_drawPixel(164,120,GFX_COLOR_RED);
-        gfx_drawBitmap(0,0,image_data_chiles,320,240);
+        gfx_drawBitmap(0,0,image_data_pongMenu,320,240);
         lcd_show_frame();
     }
 }

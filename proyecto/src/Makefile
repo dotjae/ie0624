@@ -9,7 +9,7 @@ SHARED_DIR += ../include/images
 CFILES += main.c
 CFILES += clock.c console.c font-7x12.c gfx.c lcd-spi.c sdram.c 
 CFILES += button.c
-CFILES += qr.c chiles.c	# imágenes
+CFILES += qr.c chiles.c	pongMenu.c # imágenes
 
 DEVICE=stm32f429zit6u
 OOCD_FILE = board/stm32f4discovery.cfg
