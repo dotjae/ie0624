@@ -1,10 +1,7 @@
 PROJECT = firmware
 BUILD_DIR = bin
 
-SHARED_DIR += ../include/lcd-serial
-SHARED_DIR += ../include/button
-SHARED_DIR += ../include/pong
-SHARED_DIR += ../include/images
+SHARED_DIR += ../include/
 
 CFILES += main.c
 CFILES += clock.c console.c font-7x12.c gfx.c lcd-spi.c sdram.c 
