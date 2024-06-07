@@ -33,3 +33,24 @@ extern const tImage pvp;
 
 // QR
 extern const tImage qr;
+
+// 'Inicio'
+extern const tImage Inicio;
+
+// 1
+extern const tImage one;
+
+// 2
+extern const tImage two;
+
+// 3
+extern const tImage three;
+
+// outline para el inicio
+extern const tImage inicio_outline;
+
+// abort
+extern const tImage abortPvp;
+
+// outline para aborts
+extern const tImage abort_outline;
