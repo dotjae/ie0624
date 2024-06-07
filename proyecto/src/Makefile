@@ -11,7 +11,8 @@ CFILES += qr.c chiles.c	pongMenu.c outline1.c outline2.c strings.c # imágenes
 CFILES += pong.c mu.c pvp.c git.c # más imágenes
 CFILES += Inicio.c 1.c 2.c 3.c inicio_outline.c
 CFILES += fsm.c
-CFILES += abort.c abort_outline.c
+CFILES += escape.c
+CFILES += paddle.c game_outline.c
 
 DEVICE=stm32f429zit6u
 OOCD_FILE = board/stm32f4discovery.cfg

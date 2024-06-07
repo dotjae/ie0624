@@ -49,8 +49,11 @@ extern const tImage three;
 // outline para el inicio
 extern const tImage inicio_outline;
 
-// abort
-extern const tImage abortPvp;
-
 // outline para aborts
-extern const tImage abort_outline;
+extern const tImage escape;
+
+// paddle
+extern const tImage paddle;
+
+// outline de juego
+extern const tImage game_outline;

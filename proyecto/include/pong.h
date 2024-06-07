@@ -8,3 +8,5 @@
 #include "images.h"
 
 #define LINE_HEIGHT 15
+
+void menu_fsm(void);

@@ -36,7 +36,15 @@ uint16_t currentY;
 uint16_t cycleEnum          = 0;
 uint16_t pressedDuration    = 0;
 uint32_t pressedTime        = 0;
-uint16_t startTime          = 0;
+uint16_t startTime;
+
+
+// for pong logic
+typedef struct
+{
+    uint16_t x,y;
+    uint16_t height;
+} paddleXY;
 
 void menu_fsm(void)
 {
@@ -68,6 +76,7 @@ void menu_fsm(void)
                 
                 if (pressedDuration > 1000)
                 {
+                    startTime = 0;      // TODO: remove this quick fix
                     STATE = (MENU_STATE == SEL_PVP) ? PVP_INIT: GIT;  // main menu only has pvp and credits options 
                 }
                 else
@@ -106,9 +115,9 @@ void menu_fsm(void)
             gfx_drawBitmap(104,135,Inicio.data,Inicio.width,Inicio.height);
             
             // 'Presione un botón para cancelar'
-            gfx_drawBitmap(89,191,abort_outline.data,abort_outline.width,abort_outline.height);
-            gfx_drawBitmap(93,196,abortPvp.data,abortPvp.width,abortPvp.height);
-
+            gfx_drawBitmap(89,191,escape.data,escape.width,escape.height);
+                
+            // TODO: after sometime a POR is done, startTime does not default to 0
             switch (PVP_START_STATE)
             {
                 case INICIO3:
@@ -151,12 +160,8 @@ void menu_fsm(void)
         case PVP:
             // pong game state, wip
             gfx_fillScreen(LCD_BLACK);
-            gfx_setTextSize(2);
-            gfx_setTextColor(LCD_WHITE,LCD_BLACK);
-            gfx_puts_centered("WIP",120);
-            lcd_show_frame();
-            msleep(2000);
-            STATE = MAIN_MENU;
+            gfx_drawBitmap(10,10,game_outline.data,game_outline.width,game_outline.height);
+            gfx_drawBitmap(15,165,paddle.data,paddle.width,paddle.height);
         break;
         case GIT:
             gfx_fillScreen(LCD_BLACK);
