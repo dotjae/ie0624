@@ -62,7 +62,7 @@ uint32_t mtime(void)
 void clock_init(void)
 {
 	/* Base board frequency, set to 168Mhz */
-	rcc_clock_setup_pll(&rcc_hse_8mhz_3v3[RCC_CLOCK_3V3_168MHZ]);
+	rcc_clock_setup_pll(&rcc_hse_8mhz_3v3[RCC_CLOCK_3V3_180MHZ]);
 	// rcc_periph_clock_enable(RCC_ADC2);
 
 	/* clock rate / 1000 to get 1mS interrupt rate */

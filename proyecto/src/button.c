@@ -1,5 +1,6 @@
 #include "button.h"
 
+// TODO: change this doc
 /**
  * @brief Initializes the GPIO settings for buttons and LEDs.
  *
@@ -16,10 +17,18 @@ void button_init(void)
 	/* Set GPIO13 (in GPIO port G) to 'output push-pull'. */
 	gpio_mode_setup(GPIOG, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO13);
 	gpio_mode_setup(GPIOG, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO14);
+
 	/* Enable GPIOA clock. */
 	rcc_periph_clock_enable(RCC_GPIOA);
 
 	/* Set GPIO0 (in GPIO port A) to 'input open-drain'. */
 	gpio_mode_setup(GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO0);
+
+	/* Enable GPIOD clock. */
+	rcc_periph_clock_enable(RCC_GPIOD);
+
+	/* Set GPIO1 and GPIO2 (in GPIO port D) to 'input pulldown'. */
+	gpio_mode_setup(GPIOD, GPIO_MODE_INPUT, GPIO_PUPD_PULLDOWN, 
+            GPIO1 | GPIO2 | GPIO5 | GPIO7);
 }
 

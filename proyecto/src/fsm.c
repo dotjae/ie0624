@@ -1,4 +1,5 @@
 #include "fsm.h"
+#include <stdbool.h>
 
 // Global state definitions
 typedef enum
@@ -24,7 +25,17 @@ typedef enum
     INICIO3,
     INICIO2,
     INICIO1
-} pvpStart;
+} pvpStart; 
+
+// for pong logic
+typedef struct
+{
+    uint16_t x,y;
+    uint16_t height;
+} paddleXY;
+
+#define INIT_PADDLE_Y(X) do{(X).y = 90;} while(0)  // TODO: generalize for any paddle height
+#define MOV_PADDLE 12   // pixels paddle moves while button is actioned
 
 // FSMs states
 gameState STATE = MAIN_MENU;    // Show menu at POR
@@ -35,16 +46,13 @@ pvpStart PVP_START_STATE = INICIO3; // Show 'Inicio en 3' when PvP is selected
 uint16_t currentY;
 uint16_t cycleEnum          = 0;
 uint16_t pressedDuration    = 0;
-uint32_t pressedTime        = 0;
-uint16_t startTime;
+uint16_t pressedTime        = 0;
+uint16_t startTime          = 0;
+uint32_t deltaT             = 0;
 
-
-// for pong logic
-typedef struct
-{
-    uint16_t x,y;
-    uint16_t height;
-} paddleXY;
+// structs
+paddleXY Paddle1;
+paddleXY Paddle2;
 
 void menu_fsm(void)
 {
@@ -76,7 +84,6 @@ void menu_fsm(void)
                 
                 if (pressedDuration > 1000)
                 {
-                    startTime = 0;      // TODO: remove this quick fix
                     STATE = (MENU_STATE == SEL_PVP) ? PVP_INIT: GIT;  // main menu only has pvp and credits options 
                 }
                 else
@@ -102,7 +109,11 @@ void menu_fsm(void)
                 break;
             }
         break;
+
         case PVP_INIT:
+            /* paddles start at half screen */
+            INIT_PADDLE_Y(Paddle1);       // TODO: generalize for every round taken
+            INIT_PADDLE_Y(Paddle2); 
             gfx_fillScreen(LCD_BLACK);
             
             // Title
@@ -122,7 +133,7 @@ void menu_fsm(void)
             {
                 case INICIO3:
                     gfx_drawBitmap(208,136,three.data,three.width,three.height);
-                    if (startTime == 0) 
+                    if (startTime == 0)
                     {
                         startTime = mtime();
                     }
@@ -146,7 +157,7 @@ void menu_fsm(void)
                        PVP_START_STATE = INICIO3; 
                        STATE = PVP;
                     }
-                    break;
+                break;
             }
             
             // poll interrupt on button -> abort pvp 
@@ -156,12 +167,51 @@ void menu_fsm(void)
                 PVP_START_STATE = INICIO3; 
                 STATE = MAIN_MENU;
             }
-        break;
+            break;
         case PVP:
-            // pong game state, wip
             gfx_fillScreen(LCD_BLACK);
             gfx_drawBitmap(10,10,game_outline.data,game_outline.width,game_outline.height);
-            gfx_drawBitmap(15,165,paddle.data,paddle.width,paddle.height);
+            
+            /* left paddle */
+            // move paddle down
+            if (gpio_get(GPIOD,GPIO1))
+            {
+                Paddle1.y += MOV_PADDLE;
+                gpio_toggle(GPIOG,GPIO13);
+            }
+
+            // move paddle up
+            if (gpio_get(GPIOD,GPIO2))
+            {
+                Paddle1.y -= MOV_PADDLE;
+                gpio_toggle(GPIOG,GPIO14);
+            }
+
+            if (Paddle1.y >= 165) Paddle1.y = 165;
+            if (Paddle1.y <= 15 ) Paddle1.y = 15;
+
+            gfx_drawBitmap(15,Paddle1.y,paddle.data,paddle.width,paddle.height);  // 165 is minimum
+            
+            /* right paddle */
+            // move paddle down
+            if (gpio_get(GPIOD,GPIO5) && Paddle2.y <= 165)
+            {
+                Paddle2.y += MOV_PADDLE;
+                gpio_toggle(GPIOG,GPIO13);
+            }
+
+            // move paddle up
+            if (gpio_get(GPIOD,GPIO7) && Paddle2.y > 15)
+            {
+                Paddle2.y -= MOV_PADDLE;
+                gpio_toggle(GPIOG,GPIO14);
+            }
+
+            if (Paddle2.y >= 165) Paddle2.y = 165;
+            if (Paddle2.y <= 15 ) Paddle2.y = 15;
+
+            gfx_drawBitmap(290,Paddle2.y,paddle.data,paddle.width,paddle.height);  // 165 is minimum
+
         break;
         case GIT:
             gfx_fillScreen(LCD_BLACK);
