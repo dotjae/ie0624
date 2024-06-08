@@ -307,7 +307,7 @@ lcd_spi_init(void)
 	display_frame = cur_frame + (LCD_WIDTH * LCD_HEIGHT);
 
 	rcc_periph_clock_enable(RCC_SPI5);
-	spi_init_master(LCD_SPI, SPI_CR1_BAUDRATE_FPCLK_DIV_4,
+	spi_init_master(LCD_SPI, SPI_CR1_BAUDRATE_FPCLK_DIV_4,  // SPI_CR1_BAUDRATE_FPCLK_DIV_4 -> SPI_CR1_BAUDRATE_FPCLK_DIV_2 
 					SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
 					SPI_CR1_CPHA_CLK_TRANSITION_1,
 					SPI_CR1_DFF_8BIT,

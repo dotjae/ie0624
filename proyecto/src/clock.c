@@ -66,9 +66,10 @@ void clock_init(void)
 	// rcc_periph_clock_enable(RCC_ADC2);
 
 	/* clock rate / 1000 to get 1mS interrupt rate */
-	systick_set_reload(168000);
+	systick_set_reload(180000); // before was 1680000
 	systick_set_clocksource(STK_CSR_CLKSOURCE_AHB);
 	systick_counter_enable();
+
 	/* this done last */
 	systick_interrupt_enable();
 }

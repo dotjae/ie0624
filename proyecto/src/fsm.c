@@ -169,7 +169,7 @@ void menu_fsm(void)
             }
             break;
         case PVP:
-            gfx_fillScreen(LCD_BLACK);
+            // gfx_fillScreen(LCD_BLACK);
             gfx_drawBitmap(10,10,game_outline.data,game_outline.width,game_outline.height);
             
             /* left paddle */
@@ -186,7 +186,7 @@ void menu_fsm(void)
                 Paddle1.y -= MOV_PADDLE;
                 gpio_toggle(GPIOG,GPIO14);
             }
-
+            
             if (Paddle1.y >= 165) Paddle1.y = 165;
             if (Paddle1.y <= 15 ) Paddle1.y = 15;
 
