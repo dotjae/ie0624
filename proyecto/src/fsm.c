@@ -34,13 +34,31 @@ typedef struct
     uint16_t height;
 } paddleXY;
 
-#define INIT_PADDLE_Y(X) do{(X).y = 90;} while(0)  // TODO: generalize for any paddle height
+// for ball movement
+typedef struct
+{   
+    int16_t x,y;
+    int16_t dx,dy;   
+} ballXY;
+
+// ball states
+typedef enum
+{
+    START,
+    FLOATING,
+    SAVE,
+    GOAL,
+    HORIZONTAL,
+} ball_state;
+
+#define INIT_PADDLE_Y(paddle) do{(paddle).y = 90;} while(0)  // TODO: generalize for any paddle height
 #define MOV_PADDLE 5   // pixels paddle moves while button is actioned
 
 // FSMs states
 gameState STATE = MAIN_MENU;    // Show menu at POR
 selState MENU_STATE = SEL_PVP;  // Select PVP at POR
 pvpStart PVP_START_STATE = INICIO3; // Show 'Inicio en 3' when PvP is selected
+ball_state BALL_STATE = START;
 
 // Inits
 uint16_t currentY;
@@ -53,6 +71,7 @@ uint32_t deltaT             = 0;
 // structs
 paddleXY Paddle1;
 paddleXY Paddle2;
+ballXY Ball;
 
 void menu_fsm(void)
 {
@@ -167,7 +186,7 @@ void menu_fsm(void)
             }
             break;
         case PVP:
-            gfx_drawBitmap(10,10,game_outline);
+            // gfx_drawBitmap(10,10,game_outline);
             
             /* left paddle */
             // move paddle down
@@ -187,8 +206,8 @@ void menu_fsm(void)
             if (Paddle1.y >= 165) Paddle1.y = 165;
             if (Paddle1.y <= 15 ) Paddle1.y = 15;
 
-            gfx_drawBitmap(15,Paddle1.y,paddle);  // 165 is minimum
-            
+            gfx_fillRect(15,Paddle1.y,10,60,GFX_WHITE);
+
             /* right paddle */
             // move paddle down
             if (gpio_get(GPIOA,GPIO7) && Paddle2.y <= 165)
@@ -207,8 +226,54 @@ void menu_fsm(void)
             if (Paddle2.y >= 165) Paddle2.y = 165;
             if (Paddle2.y <= 15 ) Paddle2.y = 15;
 
-            gfx_drawBitmap(290,Paddle2.y,paddle);  // 165 is minimum
+            gfx_fillRect(295,Paddle2.y,10,60,GFX_WHITE);
+            
+            /* ball */
+            switch (BALL_STATE)
+            {
+                case START:
+                    Ball.x = 160;
+                    Ball.y = 120;
+                    Ball.dx = 5;
+                    Ball.dy = 5;
 
+                    gfx_fillCircle(Ball.x, Ball.y, 5, GFX_WHITE);
+                    BALL_STATE = FLOATING;
+                break;
+
+                // else if ((Ball.x <= 25 && (Ball.y >= Paddle1.y && Ball.y <= Paddle1.y + 60)) || (Ball.x >= 295 && (Ball.y >= Paddle2.y && Ball.y <= Paddle2.y + 60)))
+
+                case FLOATING:
+                    ball_update();
+                    // BALL_STATE = (Ball.y >= 235 || Ball.y <= 5) ? HORIZONTAL: ( (Ball.x <= 5 || Ball.x >= 315) ? SAVE : FLOATING);
+                    if (Ball.y >= 235 || Ball.y <= 5)
+                        BALL_STATE = HORIZONTAL;
+                    else if (Ball.x <= 25 || Ball.x >= 295 )
+                    {
+                        if ((Ball.x <= 25 && (Ball.y >= Paddle1.y && Ball.y <= Paddle1.y + 60)) || (Ball.x >= 295 && (Ball.y >= Paddle2.y && Ball.y <= Paddle2.y + 60)))
+                            BALL_STATE = SAVE;
+                        else 
+                            BALL_STATE = GOAL;
+                    }
+                    else 
+                        BALL_STATE = FLOATING;
+                break;
+                case SAVE:
+                    Ball.dx = -Ball.dx;
+                    ball_update();
+                    BALL_STATE = FLOATING;
+                break;
+                case GOAL:
+                    ball_update();
+                    if (Ball.x <= -10 || Ball.x >= 330)
+                        BALL_STATE = START;
+                break;
+                case HORIZONTAL:
+                    Ball.dy = -Ball.dy;
+                    ball_update();
+                    BALL_STATE = FLOATING;
+                break;
+            }
         break;
         case GIT:
             // WIP
@@ -216,4 +281,11 @@ void menu_fsm(void)
             STATE = MAIN_MENU;
         break;
     }
+}
+
+void ball_update()
+{
+    Ball.x += Ball.dx;
+    Ball.y += Ball.dy;
+    gfx_fillCircle(Ball.x, Ball.y, 5, GFX_WHITE);
 }

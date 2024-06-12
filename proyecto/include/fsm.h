@@ -9,3 +9,4 @@
 #define LINE_HEIGHT 20
 
 void menu_fsm(void);
+void ball_update(void);

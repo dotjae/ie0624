@@ -145,3 +145,43 @@ void gfx_drawBitmap(int16_t x, int16_t y, tImage bmp)
 			}
 		}
 }
+
+void gfx_fillCircle(int16_t x0, int16_t y0, int16_t r,
+		    uint32_t color)
+{
+	gfx_drawFastVLine(x0, y0 - r, 2*r+1, color);
+	gfx_fillCircleHelper(x0, y0, r, 3, 0, color);
+}
+
+/* Used to do circles and roundrects */
+void gfx_fillCircleHelper(int16_t x0, int16_t y0, int16_t r,
+			  uint8_t cornername, int16_t delta, uint32_t color)
+{
+	int16_t f     = 1 - r;
+	int16_t ddF_x = 1;
+	int16_t ddF_y = -2 * r;
+	int16_t x     = 0;
+	int16_t y     = r;
+
+	while (x < y) {
+		if (f >= 0) {
+			y--;
+			ddF_y += 2;
+			f     += ddF_y;
+		}
+		x++;
+		ddF_x += 2;
+		f     += ddF_x;
+
+		if (cornername & 0x1) {
+			gfx_drawFastVLine(x0+x, y0-y, 2*y+1+delta, color);
+			gfx_drawFastVLine(x0+y, y0-x, 2*x+1+delta, color);
+		}
+		if (cornername & 0x2) {
+			gfx_drawFastVLine(x0-x, y0-y, 2*y+1+delta, color);
+			gfx_drawFastVLine(x0-y, y0-x, 2*x+1+delta, color);
+		}
+	}
+}
+
+

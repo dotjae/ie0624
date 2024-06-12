@@ -19,6 +19,9 @@ void gfx_fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint32_t color);
 void gfx_fillScreen(uint32_t color);
 void gfx_init(void (*draw)(int, int, uint32_t), int, int);
 void gfx_drawBitmap(int16_t x, int16_t y, tImage bmp);
+void gfx_fillCircle(int16_t x0, int16_t y0, int16_t r,
+		    uint32_t color);
+void gfx_fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int16_t delta, uint32_t color);
 
 #define GFX_WIDTH   320
 #define GFX_HEIGHT  240
