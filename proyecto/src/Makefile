@@ -1,18 +1,28 @@
 PROJECT = firmware
 BUILD_DIR = bin
 
+# headers
 SHARED_DIR += ../include/
 
-# TODO: Fix all the CFILES includes
-CFILES += main.c
-CFILES += clock.c console.c font-7x12.c gfx.c lcd-spi.c sdram.c 
-CFILES += button.c 
-CFILES += qr.c chiles.c	pongMenu.c outline1.c outline2.c strings.c # imágenes
-CFILES += pong.c mu.c pvp.c git.c # más imágenes
-CFILES += Inicio.c 1.c 2.c 3.c inicio_outline.c
-CFILES += fsm.c
-CFILES += escape.c
-CFILES += paddle.c game_outline.c
+# peripheral init files 
+CFILES += button.c clock.c console.c lcd-dma.c lcd-spi.c sdram.c 
+
+###########
+# bitmaps #
+###########
+# main menu
+CFILES += mu.c pong.c pvp.c git.c strings.c options_outline.c pong_outline.c 
+
+# loading screen
+CFILES += escape.c Inicio.c one.c two.c three.c inicio_outline.c 
+
+# Credits/Git
+
+# gameplay
+CFILES += paddle.c game_outline.c 
+
+# source code 
+CFILES += fsm.c gfx.c main.c 
 
 DEVICE=stm32f429zit6u
 OOCD_FILE = board/stm32f4discovery.cfg

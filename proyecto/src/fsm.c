@@ -35,7 +35,7 @@ typedef struct
 } paddleXY;
 
 #define INIT_PADDLE_Y(X) do{(X).y = 90;} while(0)  // TODO: generalize for any paddle height
-#define MOV_PADDLE 12   // pixels paddle moves while button is actioned
+#define MOV_PADDLE 5   // pixels paddle moves while button is actioned
 
 // FSMs states
 gameState STATE = MAIN_MENU;    // Show menu at POR
@@ -59,15 +59,14 @@ void menu_fsm(void)
     switch (STATE)
     {
         case MAIN_MENU:
-            gfx_fillScreen(LCD_BLACK);
             // Title
-            gfx_drawBitmap(80,50,outline1.data,outline1.width,outline1.height);
-            gfx_drawBitmap(115,57,pong.data,pong.width,pong.height);
-            gfx_drawBitmap(86,68,mu.data,mu.width,mu.height);
+            gfx_drawBitmap(80,50,pong_outline);
+            gfx_drawBitmap(115,57,pong);
+            gfx_drawBitmap(86,68,mu);
             
             // Options
-            gfx_drawBitmap(117,125,pvp.data,pvp.width,pvp.height);
-            gfx_drawBitmap(113,154,git.data,git.width,git.height);
+            gfx_drawBitmap(117,125,pvp);
+            gfx_drawBitmap(113,154,git);
             
             // TODO: function to read button 
             // short press -> toggle between menu options
@@ -89,7 +88,7 @@ void menu_fsm(void)
                 else
                 {
                     MENU_STATE = (selState)((cycleEnum += 1) % __count);   // cyclic enum, for menu state transitions
-                    msleep(10);
+                    milli_sleep(10);
                 }
             }
 
@@ -97,12 +96,12 @@ void menu_fsm(void)
             switch (MENU_STATE)
             {
                 case SEL_PVP:
-                    gfx_drawBitmap(100,120,outline2.data,outline2.width,outline2.height);
-                    gfx_drawBitmap(117,125,pvp.data,pvp.width,pvp.height);
+                    gfx_drawBitmap(100,120,options_outline);
+                    gfx_drawBitmap(117,125,pvp);
                 break;
                 case SEL_GIT:
-                    gfx_drawBitmap(100,149,outline2.data,outline2.width,outline2.height);
-                    gfx_drawBitmap(113,154,git.data,git.width,git.height);
+                    gfx_drawBitmap(100,149,options_outline);
+                    gfx_drawBitmap(113,154,git);
                 break;
                 default:
                     MENU_STATE = SEL_PVP;
@@ -114,25 +113,24 @@ void menu_fsm(void)
             /* paddles start at half screen */
             INIT_PADDLE_Y(Paddle1);       // TODO: generalize for every round taken
             INIT_PADDLE_Y(Paddle2); 
-            gfx_fillScreen(LCD_BLACK);
             
             // Title
-            gfx_drawBitmap(80,50,outline1.data,outline1.width,outline1.height);
-            gfx_drawBitmap(115,57,pong.data,pong.width,pong.height);
-            gfx_drawBitmap(86,68,mu.data,mu.width,mu.height);
+            gfx_drawBitmap(80,50,pong_outline);
+            gfx_drawBitmap(115,57,pong);
+            gfx_drawBitmap(86,68,mu);
             
             // 'Inicio en 3,2,1...'
-            gfx_drawBitmap(90,120,inicio_outline.data,inicio_outline.width,inicio_outline.height);
-            gfx_drawBitmap(104,135,Inicio.data,Inicio.width,Inicio.height);
+            gfx_drawBitmap(90,120,inicio_outline);
+            gfx_drawBitmap(104,135,Inicio);
             
             // 'Presione un botón para cancelar'
-            gfx_drawBitmap(89,191,escape.data,escape.width,escape.height);
+            gfx_drawBitmap(89,191,escape);
                 
             // TODO: after sometime a POR is done, startTime does not default to 0
             switch (PVP_START_STATE)
             {
                 case INICIO3:
-                    gfx_drawBitmap(208,136,three.data,three.width,three.height);
+                    gfx_drawBitmap(208,136,three);
                     if (startTime == 0)
                     {
                         startTime = mtime();
@@ -143,14 +141,14 @@ void menu_fsm(void)
                     }
                 break;
                 case INICIO2:
-                    gfx_drawBitmap(208,136,two.data,two.width,two.height);
+                    gfx_drawBitmap(208,136,two);
                     if (mtime() - startTime > 2000)
                     {
                        PVP_START_STATE = INICIO1; 
                     }
                 break;
                 case INICIO1:
-                    gfx_drawBitmap(208,136,one.data,one.width,one.height);
+                    gfx_drawBitmap(208,136,one);
                     if (mtime() - startTime > 3000)
                     {
                        startTime = 0;
@@ -169,19 +167,18 @@ void menu_fsm(void)
             }
             break;
         case PVP:
-            // gfx_fillScreen(LCD_BLACK);
-            gfx_drawBitmap(10,10,game_outline.data,game_outline.width,game_outline.height);
+            gfx_drawBitmap(10,10,game_outline);
             
             /* left paddle */
             // move paddle down
-            if (gpio_get(GPIOD,GPIO1))
+            if (gpio_get(GPIOA,GPIO1))
             {
                 Paddle1.y += MOV_PADDLE;
                 gpio_toggle(GPIOG,GPIO13);
             }
 
             // move paddle up
-            if (gpio_get(GPIOD,GPIO2))
+            if (gpio_get(GPIOA,GPIO0))
             {
                 Paddle1.y -= MOV_PADDLE;
                 gpio_toggle(GPIOG,GPIO14);
@@ -190,18 +187,18 @@ void menu_fsm(void)
             if (Paddle1.y >= 165) Paddle1.y = 165;
             if (Paddle1.y <= 15 ) Paddle1.y = 15;
 
-            gfx_drawBitmap(15,Paddle1.y,paddle.data,paddle.width,paddle.height);  // 165 is minimum
+            gfx_drawBitmap(15,Paddle1.y,paddle);  // 165 is minimum
             
             /* right paddle */
             // move paddle down
-            if (gpio_get(GPIOD,GPIO5) && Paddle2.y <= 165)
+            if (gpio_get(GPIOA,GPIO7) && Paddle2.y <= 165)
             {
                 Paddle2.y += MOV_PADDLE;
                 gpio_toggle(GPIOG,GPIO13);
             }
 
             // move paddle up
-            if (gpio_get(GPIOD,GPIO7) && Paddle2.y > 15)
+            if (gpio_get(GPIOA,GPIO5) && Paddle2.y > 15)
             {
                 Paddle2.y -= MOV_PADDLE;
                 gpio_toggle(GPIOG,GPIO14);
@@ -210,30 +207,12 @@ void menu_fsm(void)
             if (Paddle2.y >= 165) Paddle2.y = 165;
             if (Paddle2.y <= 15 ) Paddle2.y = 15;
 
-            gfx_drawBitmap(290,Paddle2.y,paddle.data,paddle.width,paddle.height);  // 165 is minimum
+            gfx_drawBitmap(290,Paddle2.y,paddle);  // 165 is minimum
 
         break;
         case GIT:
-            gfx_fillScreen(LCD_BLACK);
-            gfx_setTextSize(1);
-            gfx_setTextColor(LCD_WHITE,LCD_BLACK);
-            currentY = 0;
-            gfx_puts_centered("Universidad de Costa Rica",      currentY += LINE_HEIGHT);
-            gfx_puts_centered("Facultad de Ingenieria",         currentY += LINE_HEIGHT);
-            gfx_puts_centered("Escuela de Ingenieria Electrica",currentY += LINE_HEIGHT);
-            gfx_puts_centered("IE0624 Laboratorio de",          currentY += LINE_HEIGHT);
-            gfx_puts_centered("Microcontroladores, I-2024",     currentY += LINE_HEIGHT);
-            gfx_puts_centered("Proyecto de microcontroladores", currentY += LINE_HEIGHT);
-            gfx_puts_centered("Profesor:",                      currentY += LINE_HEIGHT);
-            gfx_puts_centered("MSc. Marco Villalta F.",         currentY += LINE_HEIGHT);
-            gfx_puts_centered("Estudiantes:",                   currentY += LINE_HEIGHT);
-            gfx_puts_centered("Jose Flores Q.  B82994",         currentY += LINE_HEIGHT);
-            gfx_puts_centered("Roger Piovet G. C15990",         currentY += LINE_HEIGHT);
-            lcd_show_frame();
-            msleep(10000);
-            gfx_drawBitmap(0,0,qr.data,qr.width,qr.height);
-            lcd_show_frame();
-            msleep(10000);
+            // WIP
+             milli_sleep(10000);
             STATE = MAIN_MENU;
         break;
     }

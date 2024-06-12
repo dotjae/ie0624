@@ -1,16 +1,31 @@
-#include "pong.h"
+#include "lcd-dma.h"
+#include "fsm.h"
+#include "button.h"
 
+// trying to draw a bitmap
 
-int main(void) {
-    clock_init  ();
-    console_init(115200);
-    button_init ();
-    sdram_init  ();
-    lcd_spi_init();
-    gfx_init    (lcd_draw_pixel, LCD_WIDTH,LCD_HEIGHT);
+int main(void)
+{
+	/* init timers. */
+	clock_setup();
+
+	/* set up USART 1. */
+	console_setup(115200);
+	console_stdio_setup();
     
-    while (1) {
-        menu_fsm();       
-        lcd_show_frame();
+	/* set up SDRAM. */
+	sdram_init();
+
+	lcd_dma_init();
+	lcd_spi_init();
+    button_init();
+
+    gfx_init(draw_pixel, 320, 240);
+
+	while (1) {
+        gfx_fillScreen(GFX_BLACK);
+        menu_fsm();
+        show_frame();
     }
+
 }

@@ -20,15 +20,13 @@ void button_init(void)
 
 	/* Enable GPIOA clock. */
 	rcc_periph_clock_enable(RCC_GPIOA);
-
-	/* Set GPIO0 (in GPIO port A) to 'input open-drain'. */
-	gpio_mode_setup(GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO0);
-
-	/* Enable GPIOD clock. */
-	rcc_periph_clock_enable(RCC_GPIOD);
-
-	/* Set GPIO1 and GPIO2 (in GPIO port D) to 'input pulldown'. */
-	gpio_mode_setup(GPIOD, GPIO_MODE_INPUT, GPIO_PUPD_PULLDOWN, 
-            GPIO1 | GPIO2 | GPIO5 | GPIO7);
+    
+    /*      Paddle controls 
+     *                  UP      DOWN
+     * Left paddle      PA0     PA1
+     * Right paddle     PA3     PA7
+     * */
+    gpio_mode_setup(GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_PULLDOWN,
+            GPIO0 | GPIO1 | GPIO5 | GPIO7); 
 }
 

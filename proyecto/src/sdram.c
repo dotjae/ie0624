@@ -1,3 +1,4 @@
+#include "sdram.h"
 /*
  * This file is part of the libopencm3 project.
  *
@@ -26,7 +27,6 @@
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/fsmc.h>
 #include "clock.h"
-#include "sdram.h"
 
 /*
  * This is just syntactic sugar but it helps, all of these
@@ -75,8 +75,9 @@ sdram_init(void) {
 	rcc_periph_clock_enable(RCC_GPIOG);
 
 	for (i = 0; i < 6; i++) {
-		gpio_mode_setup(sdram_pins[i].gpio, GPIO_MODE_AF,
-				GPIO_PUPD_NONE, sdram_pins[i].pins);
+		gpio_mode_setup(sdram_pins[i].gpio,
+				GPIO_MODE_AF, GPIO_PUPD_NONE,
+				sdram_pins[i].pins);
 		gpio_set_output_options(sdram_pins[i].gpio, GPIO_OTYPE_PP,
 					GPIO_OSPEED_50MHZ, sdram_pins[i].pins);
 		gpio_set_af(sdram_pins[i].gpio, GPIO_AF12, sdram_pins[i].pins);
@@ -119,7 +120,7 @@ sdram_init(void) {
 	 *	- Load the Mode Register
 	 */
 	sdram_command(SDRAM_BANK2, SDRAM_CLK_CONF, 1, 0);
-	msleep(1); /* sleep at least 100uS */
+	milli_sleep(1); /* sleep at least 100uS */
 	sdram_command(SDRAM_BANK2, SDRAM_PALL, 1, 0);
 	sdram_command(SDRAM_BANK2, SDRAM_AUTO_REFRESH, 4, 0);
 	tr_tmp = SDRAM_MODE_BURST_LENGTH_2				|

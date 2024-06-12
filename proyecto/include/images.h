@@ -1,7 +1,12 @@
+#ifndef __IMAGES_H
+#define __IMAGES_H
+
 #include <stdint.h>
 
- typedef struct {
-     const uint16_t *data;
+
+
+typedef struct {
+     const uint32_t *data;
      uint16_t width;
      uint16_t height;
      uint8_t dataSize;
@@ -9,33 +14,23 @@
 
 
 /* MENU ELEMENTS */
+// Abort for game load
+extern const tImage escape;
 
-// uPong surrounding rectangle 
-extern const tImage outline1;
-
-// Options surrounding rectangle
-extern const tImage outline2;
-
-// Main menu strings
-extern const tImage strings;
+// game outline
+extern const tImage game_outline;
 
 // 'Créditos/Git'
 extern const tImage git;
 
-// 'Pong'
-extern const tImage pong;
-
-// 'Mu'
-extern const tImage mu;
-
-// 'Inicio(PvP)'
-extern const tImage pvp;
-
-// QR
-extern const tImage qr;
-
 // 'Inicio'
 extern const tImage Inicio;
+
+// Outline for countdown
+extern const tImage inicio_outline;
+
+// 'mu'
+extern const tImage mu;
 
 // 1
 extern const tImage one;
@@ -46,14 +41,22 @@ extern const tImage two;
 // 3
 extern const tImage three;
 
-// outline para el inicio
-extern const tImage inicio_outline;
+// Options outline
+extern const tImage options_outline;
 
-// outline para aborts
-extern const tImage escape;
-
-// paddle
+// Paddle
 extern const tImage paddle;
 
-// outline de juego
-extern const tImage game_outline;
+// 'Pong'
+extern const tImage pong;
+
+// Pong outline
+extern const tImage pong_outline;
+
+// 'Inicio(PvP)'
+extern const tImage pvp;
+
+// Main menu strings
+extern const tImage strings;
+
+#endif 

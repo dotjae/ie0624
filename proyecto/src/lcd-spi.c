@@ -1,3 +1,5 @@
+#include "lcd-spi.h"
+
 /*
  * This file is part of the libopencm3 project.
  *
@@ -18,70 +20,53 @@
  */
 
 /*
- * Initialize the ST Micro TFT Display using the SPI port
+ * Initialize the ST Micro TFT Display for DMA video using the SPI port
  */
-#include <stdint.h>
+#include <stddef.h>
+#include <stdio.h>
+
 #include <libopencm3/stm32/spi.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/cm3/nvic.h>
-#include "console.h"
+
 #include "clock.h"
-#include "sdram.h"
-#include "lcd-spi.h"
 
-
-/* forward prototypes for some helper functions */
-// static int print_decimal(int v);
-// static int print_hex(int v);
-
-/* Simple double buffering, one frame is displayed, the
- * other being built.
- */
-uint16_t *cur_frame;
-uint16_t *display_frame;
-
+#define LCD_SPI SPI5
 
 /*
- * Drawing a pixel consists of storing a 16 bit value in the
- * memory used to hold the frame. This code computes the address
- * of the word to store, and puts in the value we pass to it.
+ * This is an ungainly workaround (aka hack) basically I want to know
+ * when the SPI port is 'done' sending all of the bits out, and it is
+ * done when it has clocked enough bits that it would have received a
+ * byte. Since we're using the SPI port in write_only mode I am not
+ * collecting the "received" bytes into a buffer, but one could of
+ * course. I keep track of how many bytes should have been returned
+ * by decrementing the 'rx_pend' volatile. When it reaches 0 we know
+ * we are done.
+ */
+
+static volatile int rx_pend;
+static volatile uint16_t spi_rx_buf;
+
+/*
+ * This is the ISR we use. Note that the name is based on the name
+ * in the irq.json file of libopencm3 plus the "_isr" extension.
  */
 void
-lcd_draw_pixel(int x, int y, uint16_t color)
+spi5_isr(void)
 {
-	*(cur_frame + x + y * LCD_WIDTH) = color;
+	spi_rx_buf = SPI_DR(SPI5);
+	--rx_pend;
 }
 
 /*
- * Fun fact, same SPI port as the MEMS example but different
- * I/O pins. Clearly you can't use both the SPI port and the
- * MEMS chip at the same time in this example.
- *
  * For the STM32-DISCO board, SPI pins in use:
- *  N/C - RESET
- *  PC2 - CS (could be NSS but won't be)
- *  PF7 - SCLK (AF5) SPI5
+ *  N/C  - RESET
+ *  PC2  - CS (could be NSS but won't be)
+ *  PF7  - SCLK (AF5) SPI5
  *  PD13 - DATA / CMD*
- *  PF9 - MOSI (AF5) SPI5
+ *  PF9  - MOSI (AF5) SPI5
  */
-
-/*
- * This structure defines the sequence of commands to send
- * to the Display in order to initialize it. The AdaFruit
- * folks do something similar, it helps when debugging the
- * initialization sequence for the display.
- */
-struct tft_command {
-	uint16_t delay;		/* If you need a delay after */
-	uint8_t cmd;		/* command to send */
-	uint8_t n_args;		/* How many arguments it has */
-};
-
-
-/* prototype for lcd_command */
-static void lcd_command(uint8_t cmd, int delay, int n_args,
-						const uint8_t *args);
 
 /*
  * void lcd_command(cmd, delay, args, arg_ptr)
@@ -93,55 +78,206 @@ static void lcd_command(uint8_t cmd, int delay, int n_args,
 static void
 lcd_command(uint8_t cmd, int delay, int n_args, const uint8_t *args)
 {
+	uint32_t timeout;
 	int i;
 
-	gpio_clear(GPIOC, GPIO2);	/* Select the LCD */
-	(void) spi_xfer(LCD_SPI, cmd);
+	gpio_clear(GPIOC, GPIO2); /* Select the LCD */
+	rx_pend++;
+	spi_send(SPI5, cmd);
+	/* We need to wait until it is sent, if we turn on the Data
+	 * line too soon, it ends up confusing the display to thinking
+	 * its a data transfer, as it samples the D/CX line on the last
+	 * bit sent.
+	 */
+	for (timeout = 0; (timeout < 1000) && (rx_pend); timeout++) {
+		continue;
+	}
+	rx_pend = 0;		/* sometimes, at 10Mhz we miss this */
 	if (n_args) {
-		gpio_set(GPIOD, GPIO13);	/* Set the D/CX pin */
+		gpio_set(GPIOD, GPIO13); /* Set the D/CX pin */
 		for (i = 0; i < n_args; i++) {
-			(void) spi_xfer(LCD_SPI, *(args+i));
+			rx_pend++;
+			spi_send(SPI5, *(args+i));
+		}
+		/* This wait so that we don't pull CS too soon after
+		 * sending the last byte of data.
+		 */
+		for (timeout = 0; (timeout < 1000) && (rx_pend); timeout++) {
+			continue;
 		}
 	}
-	gpio_set(GPIOC, GPIO2);		/* Turn off chip select */
-	gpio_clear(GPIOD, GPIO13);	/* always reset D/CX */
+	gpio_set(GPIOC, GPIO2);	   /* Turn off chip select */
+	gpio_clear(GPIOD, GPIO13); /* always reset D/CX */
 	if (delay) {
-		msleep(delay);		/* wait, if called for */
+		milli_sleep(delay); /* wait, if called for */
 	}
 }
 
+/* Notes on the less obvious ILI9341 commands: */
+
 /*
- * This creates a 'script' of commands that can be played
- * to the LCD controller to initialize it.
- * One array holds the 'argument' bytes, the other
- * the commands.
- * Keeping them in sync is essential
+ * ILI9341 datasheet, pp 46-49:
+ *
+ *     RCM[1:0} = 0b10    command 0xb0
+ *     DPI[2:0] = 0b110   command 0x3a
+ *     RIM      = 0       command 0xf6
+ *     PCDIV    = ????    command 0xB6
+ *
+ * Pp 239-240:
+ *     external fosc = DOTCLK / (2 * (PCDIV + 1))
+ *
+ * ("Cube" is how the STM32F4Cube demo software sets the register.
+ *  "Chuck" is ChuckM's lcd-serial demo, first revision.)
+ *
+ * Command 0x3A: COLMOD: Pixel Format Set  LCD_PIXEL_FORMAT
+ *                Reset              Cube   Chuck
+ *      DPI[2:0]   110 (18 bit/pix)   110    101 (16 bit/pix)
+ *      DBI[2:0]   110 (18 bit/pix)   110    101 (16 bit/pix)
+ *
+ * Command 0xB0: RGB Interface Signal      LCD_RGB_INTERFACE
+ *                Reset              Cube
+ *      Bypass:      0 (direct)        1 (memory)
+ *      RCM[1:0]    10                10
+ *      VSPL         0 (low)           0
+ *      HSPL         0 (low)           0
+ *      DPL          0 (rising)        1 (falling)
+ *      EPL          1 (low)           0 (high)
+ *
+ * Command 0xB6: Display Function Control  LCD_DFC
+ *                Reset              Cube 0A A7 27 04
+ *      PTG[1:0]    10                10
+ *      PT[1:0]     10                10
+ *      REV          1                 1
+ *      GS           0                 0
+ *      SS           0 (S1->S720)      1 (S720->S1)
+ *      SM           0                 0
+ *      ISC[3:0]  0010 (5 frames)   0111 (15 frames)
+ *      NL[5:0]   100111          100111
+ *      PCDIV[5:0]   ?            000100
+ *   S720->S1 moves the origin from the lower left corner to lower right
+ *   (viewing the board so the silkscreen is upright)
+ *
+ * Command 0xF6: Interface Control         LCD_INTERFACE
+ *               Reset              Cube  01 00 06
+ *      MY_EOR       0                 0
+ *      MX_EOR       0                 0
+ *      MV_EOR       0                 0
+ *      BGR_EOR      0                 0
+ *      WEMODE       1 (wrap)          1
+ *      EPF[1:0]    00                00
+ *      MDT[1:0]    00                00
+ *      ENDIAN       0 (MSB first)     0
+ *      DM[1:0]     00 (int clk)      01 (RGB ifc)
+ *      RM           0 (sys ifc)       1 (RGB ifc)
+ *      RIM          0 (1 xfr/pix)     0
  */
-static const uint8_t cmd_args[] = {
-	0x00, 0x1B,
-	0x0a, 0xa2,
-	0x10,
-	0x10,
-	0x45, 0x15,
-	0x90,
-/*    0xc8,*/                 /* original */
-/*                  11000000 = MY, MX, RGB */
-	0xa8,   /* rotar 90 grados para landscape de pong, MvMxMy = 101 pg 209 ILI9341 */
-	0xc2,
-	0x55,
-	0x0a, 0xa7, 0x27, 0x04,
-	0x00, 0x00, 0x00, 0xef,
-	0x00, 0x00, 0x01, 0x3f,
-/*    0x01, 0x00, 0x06,*/         /* original */
-	0x01, 0x00, 0x00,           /* modified to remove RGB mode */
-	0x01,
-	0x0F, 0x29, 0x24, 0x0C, 0x0E,
-	0x09, 0x4E, 0x78, 0x3C, 0x09,
-	0x13, 0x05, 0x17, 0x11, 0x00,
-	0x00, 0x16, 0x1B, 0x04, 0x11,
-	0x07, 0x31, 0x33, 0x42, 0x05,
-	0x0C, 0x0A, 0x28, 0x2F, 0x0F,
+
+/* ILI9341 command definitions */
+
+/* Regulative[sic] Command Set */
+#define ILI_NOP                 0x00
+#define ILI_RESET               0x01
+#define ILI_RD_DID              0x04
+#define ILI_RD_STS              0x09
+#define ILI_RD_PWR_MODE         0x0a
+#define ILI_RD_MADCTL           0x0b
+#define ILI_RD_PXL_FMT          0x0c
+#define ILI_PD_IMG_FMT          0x0d
+#define ILI_RD_SIG_MODE         0x0e
+#define ILI_RD_DIAG_RSLT        0x0f
+#define ILI_ENTER_SLEEP         0x10
+#define ILI_SLEEP_OUT           0x11
+#define ILI_PARTIAL_ON          0x12
+#define ILI_NORMAL_MODE_ON      0x13
+#define ILI_INVERSE_ON          0x20
+#define ILI_INVERSE_OFF         0x21
+#define ILI_GAMMA_SET           0x26
+#define ILI_DISP_OFF            0x28
+#define ILI_DISP_ON             0x29
+#define ILI_CAS                 0x2a
+#define ILI_PAS                 0x2b
+#define ILI_MEM_WRITE           0x2c
+#define ILI_COLOR_SET           0x2d
+#define ILI_MEM_READ            0x2e
+#define ILI_PARTIAL_AREA        0x30
+#define ILI_VERT_SCROLL_DEF     0x33
+#define ILI_TEAR_EFF_OFF        0x34
+#define ILI_TEAR_EFF_ON         0x35
+#define ILI_MEM_ACC_CTL         0x36
+#define ILI_V_SCROLL_START      0x37
+#define ILI_IDLE_OFF            0x38
+#define ILI_IDLE_ON             0x39
+#define ILI_PIX_FMT_SET         0x3a
+#define ILI_WR_MEM_CONT         0x3c
+#define ILI_RD_MEM_CONT         0x3e
+#define ILI_SET_TEAR_LINE       0x44
+#define ILI_GET_SCANLINE        0x45
+#define ILI_WR_BRIGHTNESS       0x51
+#define ILI_RD_BRIGHTNESS       0x52
+#define ILI_WR_CTRL             0x53
+#define ILI_RD_CTRL             0x54
+#define ILI_WR_CABC             0x55
+#define ILI_RD_CABC             0x56
+#define ILI_WR_CABC_MIN         0x5e
+#define ILI_RD_CABC_MAX         0x5f
+#define ILI_RD_ID1              0xda
+#define ILI_RD_ID2              0xdb
+#define ILI_RD_ID3              0xdc
+
+/* Extended Command Set */
+#define ILI_RGB_IFC_CTL         0xb0
+#define ILI_FRM_CTL_NORM        0xb1
+#define ILI_FRM_CTL_IDLE        0xb2
+#define ILI_FRM_CTL_PART        0xb3
+#define ILI_INVERSE_CTL         0xb4
+#define ILI_PORCH_CTL           0xb5
+#define ILI_FUNC_CTL            0xb6
+#define ILI_ENTRY_MODE_SET      0xb7
+#define ILI_BL_CTL_1            0xb8
+#define ILI_BL_CTL_2            0xb9
+#define ILI_BL_CTL_3            0xba
+#define ILI_BL_CTL_4            0xbb
+#define ILI_BL_CTL_5            0xbc
+#define ILI_BL_CTL_7            0xbe
+#define ILI_BL_CTL_8            0xbf
+#define ILI_PWR_CTL_1           0xc0
+#define ILI_PWR_CTL_2           0xc1
+#define ILI_VCOM_CTL_1          0xc5
+#define ILI_VCOM_CTL_2          0xc7
+#define ILI_NV_MEM_WR           0xd0
+#define ILI_NV_MEM_PROT_KEY     0xd1
+#define ILI_NV_MEM_STATUS_RD    0xd2
+#define ILI_RD_ID4              0xd3
+#define ILI_POS_GAMMA           0xe0
+#define ILI_NEG_GAMMA           0xe1
+#define ILI_GAMMA_CTL_1         0xe2
+#define ILI_GAMMA_CTL_2         0xe3
+#define ILI_IFC_CTL             0xf6
+
+/*
+ * This structure defines the sequence of commands to send
+ * to the Display in order to initialize it. The AdaFruit
+ * folks do something similar, it helps when debugging the
+ * initialization sequence for the display.
+ */
+
+#define MAX_INLINE_ARGS (sizeof(uint8_t *))
+struct tft_command {
+	uint16_t delay;		/* If you need a delay after */
+	uint8_t cmd;		/* command to send */
+	uint8_t n_args;		/* How many arguments it has */
+	union {
+		uint8_t args[MAX_INLINE_ARGS]; /* The first four arguments */
+		const uint8_t *aptr; /* More than four arguemnts */
+	};
 };
+
+static const uint8_t pos_gamma_args[] = { 0x0F, 0x29, 0x24, 0x0C, 0x0E,
+					  0x09, 0x4E, 0x78, 0x3C, 0x09,
+					  0x13, 0x05, 0x17, 0x11, 0x00 };
+static const uint8_t neg_gamma_args[] = { 0x00, 0x16, 0x1B, 0x04, 0x11,
+					  0x07, 0x31, 0x33, 0x42, 0x05,
+					  0x0C, 0x0A, 0x28, 0x2F, 0x0F };
 
 /*
  * These are the commands we're going to send to the
@@ -153,119 +289,35 @@ static const uint8_t cmd_args[] = {
  * The sequence was pieced together from the ST Micro demo
  * code, the data sheet, and other sources on the web.
  */
-const struct tft_command  initialization[] = {
-	{   0, 0xb1, 2 },	/* 0x00, 0x1B, */
-	{   0, 0xb6, 2 },	/* 0x0a, 0xa2, */
-	{   0, 0xc0, 1 },	/* 0x10, */
-	{   0, 0xc1, 1 },	/* 0x10, */
-	{   0, 0xc5, 2 },	/* 0x45, 0x15, */
-	{   0, 0xc7, 1 },	/* 0x90, */
-	{   0, 0x36, 1 },	/* 0xc8, */
-	{   0, 0xb0, 1 },	/* 0xc2, */
-	{   0, 0x3a, 1 },	/* 0x55 **added, pixel format 16 bpp */
-	{   0, 0xb6, 4 },	/* 0x0a, 0xa7, 0x27, 0x04, */
-	{   0, 0x2A, 4 },	/* 0x00, 0x00, 0x00, 0xef, */
-	{   0, 0x2B, 4 },	/* 0x00, 0x00, 0x01, 0x3f, */
-	{   0, 0xf6, 3 },	/* 0x01, 0x00, 0x06, */
-	{ 200, 0x2c, 0 },
-	{   0, 0x26, 1},	/* 0x01, */
-	{   0, 0xe0, 15 },	/* 0x0F, 0x29, 0x24, 0x0C, 0x0E, */
-				/* 0x09, 0x4E, 0x78, 0x3C, 0x09, */
-				/* 0x13, 0x05, 0x17, 0x11, 0x00, */
-	{   0, 0xe1, 15 },	/* 0x00, 0x16, 0x1B, 0x04, 0x11, */
-				/* 0x07, 0x31, 0x33, 0x42, 0x05, */
-				/* 0x0C, 0x0A, 0x28, 0x2F, 0x0F, */
-	{ 200, 0x11, 0 },
-	{   0, 0x29, 0 },
-	{   0,    0, 0 }	/* cmd == 0 indicates last command */
+#define EXPERIMENT 1
+const struct tft_command initialization[] = {
+	{  0, ILI_PWR_CTL_1,        1, .args = { 0x10 } },
+	{  0, ILI_PWR_CTL_2,        1, .args = { 0x10 } },
+	{  0, ILI_VCOM_CTL_1,       2, .args = { 0x45, 0x15 } },
+	{  0, ILI_VCOM_CTL_2,       1, .args = { 0x90 } },
+	{  0, ILI_MEM_ACC_CTL,      1, .args = { 0x08 } },
+	{  0, ILI_RGB_IFC_CTL,      1, .args = { 0xc0 } },
+	{  0, ILI_IFC_CTL,          3, .args = { 0x01, 0x00, 0x06 } },
+	{  0, ILI_GAMMA_SET,        1, .args = { 0x01 } },
+	{  0, ILI_POS_GAMMA,       15, .aptr = pos_gamma_args },
+	{  0, ILI_NEG_GAMMA,       15, .aptr = neg_gamma_args },
+	{ +5, ILI_SLEEP_OUT,        0, .args = {} },
+	{  0, ILI_DISP_ON,          0, .args = {} },
 };
 
-/* prototype for initialize_display */
-static void initialize_display(const struct tft_command cmds[]);
-
-/*
- * void initialize_display(struct cmds[])
- *
- * This is the function that sends the entire list. It also puts
- * the commands it is sending to the console.
- */
 static void
-initialize_display(const struct tft_command cmds[])
+initialize_display(const struct tft_command cmds[], size_t cmd_count)
 {
-	int i = 0;
-	int arg_offset = 0;
-	int j;
+	size_t i;
 
-	/* Initially arg offset is zero, so each time we 'consume'
-	 * a few bytes in the args array the offset is moved and
-	 * that changes the pointer we send to the command function.
-	 */
-	while (cmds[i].cmd) {
-		if (cmds[i].n_args) {
-			for (j = 0; j < cmds[i].n_args; j++) {
-			}
+	for (i = 0; i < cmd_count; i++) {
+		uint8_t arg_count = cmds[i].n_args;
+		const uint8_t *args = cmds[i].args;
+		if (arg_count > MAX_INLINE_ARGS) {
+			args = cmds[i].aptr;
 		}
-
-		lcd_command(cmds[i].cmd, cmds[i].delay, cmds[i].n_args,
-			&cmd_args[arg_offset]);
-		arg_offset += cmds[i].n_args;
-		i++;
+		lcd_command(cmds[i].cmd, cmds[i].delay, arg_count, args);
 	}
-	// console_puts("Done.\n");
-}
-
-/*
-static void test_image(void);
-
-static void
-test_image(void)
-{
-	int		x, y;
-	uint16_t	pixel;
-
-	for (x = 0; x < LCD_WIDTH; x++) {
-		for (y = 0; y < LCD_HEIGHT; y++) {
-			pixel = 0;	
-			if ((x % 16) == 0) {
-				pixel = 0xffff;	
-			}
-			if ((y % 16) == 0) {
-				pixel = 0xffff;
-			}
-			lcd_draw_pixel(x, y, pixel);
-		}
-	}
-}
-*/
-
-/*
- * void lcd_show_frame(void)
- *
- * Dump an entire frame to the LCD all at once. In theory you
- * could call this with DMA but that is made more difficult by
- * the implementation of SPI and the modules interpretation of
- * D/CX line.
- */
-void lcd_show_frame(void)
-{
-	uint16_t	*t;
-	uint8_t size[4];
-
-	t = display_frame;
-	display_frame = cur_frame;
-	cur_frame = t;
-	/*  */
-	size[0] = 0;
-	size[1] = 0;
-	size[2] = (LCD_WIDTH >> 8) & 0xff;
-	size[3] = (LCD_WIDTH) & 0xff;
-	lcd_command(0x2A, 0, 4, (const uint8_t *)&size[0]);
-	size[0] = 0;
-	size[1] = 0;
-	size[2] = (LCD_HEIGHT >> 8) & 0xff;
-	size[3] = LCD_HEIGHT & 0xff;
-	lcd_command(0x2B, 0, 4, (const uint8_t *)&size[0]);
-	lcd_command(0x2C, 0, FRAME_SIZE_BYTES, (const uint8_t *)display_frame);
 }
 
 /*
@@ -274,7 +326,7 @@ void lcd_show_frame(void)
  * Initialize the SPI port, and the through that port
  * initialize the LCD controller. Note that this code
  * will expect to be able to draw into the SDRAM on
- * the board, so the sdram much be initialized before
+> * the board, so the sdram much be initialized before
  * calling this function.
  *
  * SPI Port and GPIO Defined - for STM32F4-Disco
@@ -290,6 +342,7 @@ void lcd_show_frame(void)
 void
 lcd_spi_init(void)
 {
+	uint32_t tmp;
 
 	/*
 	 * Set up the GPIO lines for the SPI port and
@@ -303,24 +356,28 @@ lcd_spi_init(void)
 	gpio_mode_setup(GPIOF, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO7 | GPIO9);
 	gpio_set_af(GPIOF, GPIO_AF5, GPIO7 | GPIO9);
 
-	cur_frame = (uint16_t *)(SDRAM_BASE_ADDRESS);
-	display_frame = cur_frame + (LCD_WIDTH * LCD_HEIGHT);
+	rx_pend = 0;
+	/* Implement state management hack */
+	nvic_enable_irq(NVIC_SPI5_IRQ);
 
 	rcc_periph_clock_enable(RCC_SPI5);
-	spi_init_master(LCD_SPI, SPI_CR1_BAUDRATE_FPCLK_DIV_4,  // SPI_CR1_BAUDRATE_FPCLK_DIV_4 -> SPI_CR1_BAUDRATE_FPCLK_DIV_2 
-					SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
-					SPI_CR1_CPHA_CLK_TRANSITION_1,
-					SPI_CR1_DFF_8BIT,
-					SPI_CR1_MSBFIRST);
-	spi_enable_ss_output(LCD_SPI);
-	spi_enable(LCD_SPI);
+	/* This should configure SPI5 as we need it configured */
+	tmp = SPI_SR(LCD_SPI);
+	SPI_CR2(LCD_SPI) |= (SPI_CR2_SSOE | SPI_CR2_RXNEIE);
+
+	/* device clocks on the rising edge of SCK with MSB first */
+	tmp = SPI_CR1_BAUDRATE_FPCLK_DIV_4 | /* 10.25Mhz SPI Clock (42M/4) */
+	      SPI_CR1_MSTR |                 /* Master Mode */
+	      SPI_CR1_BIDIOE |               /* Write Only */
+	      SPI_CR1_SPE;                   /* Enable SPI */
+
+	SPI_CR1(LCD_SPI) = tmp; /* Do it. */
+	if (SPI_SR(LCD_SPI) & SPI_SR_MODF) {
+		SPI_CR1(LCD_SPI) = tmp; /* Re-writing will reset MODF */
+		fprintf(stderr, "Initial mode fault.\n");
+	}
 
 	/* Set up the display */
-	initialize_display(initialization);
-
-	/* create a test image */
-	// console_puts("Generating Test Image\n");
-	/* display it on the LCD */
-	
-	lcd_show_frame();
+	initialize_display(initialization,
+			   sizeof(initialization) / sizeof(initialization[0]));
 }
