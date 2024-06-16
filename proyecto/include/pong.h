@@ -1,0 +1,8 @@
+#include "clock.h"
+#include "console.h"
+#include "sdram.h"
+#include "lcd-dma.h"
+#include "lcd-spi.h"
+#include "button.h"
+#include "gfx.h"
+#include "fsm.h"

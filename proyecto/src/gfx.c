@@ -37,9 +37,6 @@
  *
  */
 
-#include <stdint.h>
-#include <math.h>
-#include <stdlib.h>
 #include "gfx.h"
 
 #define pgm_read_double_word(addr) (*(const uint32_t *)(addr))

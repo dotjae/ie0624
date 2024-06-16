@@ -1,8 +1,4 @@
-#include "lcd-dma.h"
-#include "fsm.h"
-#include "button.h"
-
-// trying to draw a bitmap
+#include "pong.h" 
 
 int main(void)
 {
@@ -15,11 +11,18 @@ int main(void)
     
 	/* set up SDRAM. */
 	sdram_init();
-
+    
+    /* set up RNG unit */
+    rng_setup();
+    
+    /* set up tft lcd */
 	lcd_dma_init();
 	lcd_spi_init();
+
+    /* set up button for polling */
     button_init();
 
+    /* set up graphics lib */
     gfx_init(draw_pixel, 320, 240);
 
 	while (1) {

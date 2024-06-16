@@ -1,69 +1,6 @@
 #include "fsm.h"
+// <<<<<<< HEAD
 #include <stdbool.h>
-
-// Global state definitions
-typedef enum
-{
-    MAIN_MENU,
-    PVP_INIT,
-    PVM_INIT,
-    PVM,
-    PVP,
-    GIT
-} gameState;
-
-// TODO: change this enum name to a more apropiate one 
-// Sub-state definitions
-typedef enum
-{
-    SEL_PVP,
-    SEL_PVM,
-    SEL_GIT,
-    __count
-} selState;
-
-// PVP countdown states
-typedef enum
-{
-    INICIO3,
-    INICIO2,
-    INICIO1
-} pvpStart;
-
-// PVM countdown states
-typedef enum
-{
-    INICIO3M,
-    INICIO2M,
-    INICIO1M
-} pvmStart; 
-
-// for pong logic
-typedef struct
-{
-    uint16_t x,y;
-    uint16_t height;
-} paddleXY;
-
-// for ball movement
-typedef struct
-{   
-    int16_t x,y;
-    int16_t dx,dy;   
-} ballXY;
-
-// ball states
-typedef enum
-{
-    START,
-    FLOATING,
-    SAVE,
-    GOAL,
-    HORIZONTAL,
-} ball_state;
-
-#define INIT_PADDLE_Y(paddle) do{(paddle).y = 90;} while(0)  // TODO: generalize for any paddle height
-#define MOV_PADDLE 5   // pixels paddle moves while button is actioned
 
 // FSMs states
 gameState STATE = MAIN_MENU;    // Show menu at POR
@@ -71,6 +8,8 @@ selState MENU_STATE = SEL_PVP;  // Select PVP at POR
 pvpStart PVP_START_STATE = INICIO3; // Show 'Inicio en 3' when PvP is selected
 pvmStart PVM_START_STATE = INICIO3M; // Show 'Inicio en 3' when PvP is selected
 ball_state BALL_STATE = START;
+// =======
+// >>>>>>> 6f0a411e868b1ce56e7eab600fc88595ccbf73ec
 
 // Inits
 uint16_t currentY;
@@ -80,6 +19,12 @@ uint16_t pressedTime        = 0;
 uint16_t startTime          = 0;
 uint32_t deltaT             = 0;
 uint8_t agent_decision;
+
+// FSMs states
+// gameState STATE = MAIN_MENU;    // Show menu at POR
+// selState MENU_STATE = SEL_PVP;  // Select PVP at POR
+// pvpStart PVP_START_STATE = INICIO3; // Show 'Inicio en 3' when PvP is selected
+// ball_state BALL_STATE = START;
 
 // structs
 paddleXY Paddle1;
@@ -262,8 +207,6 @@ void menu_fsm(void)
             }
             break;
         case PVP:
-            // gfx_drawBitmap(10,10,game_outline);
-            
             /* left paddle */
             // move paddle down
             if (gpio_get(GPIOA,GPIO1))
@@ -310,18 +253,19 @@ void menu_fsm(void)
                 case START:
                     Ball.x = 160;
                     Ball.y = 120;
-                    Ball.dx = 5;
-                    Ball.dy = 5;
+                    
+                    Ball.Dir = ball_Dir();
+
+                    // Randomize x and y velocities via randDirX randDirY
+                    Ball.dx = 5 * Ball.Dir.x;
+                    Ball.dy = 5 * Ball.Dir.y;
 
                     gfx_fillCircle(Ball.x, Ball.y, 5, GFX_WHITE);
                     BALL_STATE = FLOATING;
                 break;
 
-                // else if ((Ball.x <= 25 && (Ball.y >= Paddle1.y && Ball.y <= Paddle1.y + 60)) || (Ball.x >= 295 && (Ball.y >= Paddle2.y && Ball.y <= Paddle2.y + 60)))
-
                 case FLOATING:
                     ball_update();
-                    // BALL_STATE = (Ball.y >= 235 || Ball.y <= 5) ? HORIZONTAL: ( (Ball.x <= 5 || Ball.x >= 315) ? SAVE : FLOATING);
                     if (Ball.y >= 235 || Ball.y <= 5)
                         BALL_STATE = HORIZONTAL;
                     else if (Ball.x <= 25 || Ball.x >= 295 )
@@ -473,6 +417,7 @@ void ball_update()
     gfx_fillCircle(Ball.x, Ball.y, 5, GFX_WHITE);
 }
 
+// <<<<<<< HEAD
 
 uint8_t dumb_agent(int16_t x, int16_t y, int16_t dx, int16_t dy)
 {
@@ -485,5 +430,27 @@ uint8_t dumb_agent(int16_t x, int16_t y, int16_t dx, int16_t dy)
     {
         return 0;
     }
-
 }
+// =======
+dir ball_Dir(void)
+{
+    dir Dir;
+    int16_t dirX = random_int() % 2;
+    int16_t dirY = random_int() % 2;
+
+    if (dirX == 0) 
+        dirX = -1;
+    else 
+        dirX = 1;
+
+    if (dirY == 0) 
+        dirY = -1;
+    else 
+        dirY = 1;
+    
+    Dir.x = dirX;
+    Dir.y = dirY;
+
+    return Dir;
+}
+// >>>>>>> 6f0a411e868b1ce56e7eab600fc88595ccbf73ec

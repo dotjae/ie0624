@@ -5,8 +5,10 @@
 #ifndef _GFX_H
 #define _GFX_H
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include "images.h"
 
 #define swap(a, b) { int32_t t = a; a = b; b = t; }
