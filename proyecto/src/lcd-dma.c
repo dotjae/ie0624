@@ -3,7 +3,9 @@
 layer1_pixel* cur_frame = (void *)SDRAM_BASE_ADDRESS;
 
 layer2_pixel* display_frame =
-	(void *)SDRAM_BASE_ADDRESS + LCD_LAYER1_BYTES;
+	(void *)SDRAM_BASE_ADDRESS + 5000000; //LCD_LAYER1_BYTES;
+
+// TODO: This mem address gives problems with the byte def 
 
 /*
  * Pin assignments
@@ -151,48 +153,8 @@ void lcd_dma_init(void)
     
 	LTDC_IER = LTDC_IER_RRIE;
 	nvic_enable_irq(NVIC_LCD_TFT_IRQ);   // deshabilitar interrupciones
-
-	/* Configure the Layer 1 parameters.
-	 * (Layer 1 is the bottom layer.)    */
-	{
-		/* The Layer window horizontal and vertical position */
-		uint32_t h_start = HSYNC + HBP + 0;
-		uint32_t h_stop = HSYNC + HBP + LCD_LAYER1_WIDTH - 1;
-		LTDC_L1WHPCR = h_stop << LTDC_LxWHPCR_WHSPPOS_SHIFT |
-			       h_start << LTDC_LxWHPCR_WHSTPOS_SHIFT;
-		uint32_t v_start = VSYNC + VBP + 0;
-		uint32_t v_stop = VSYNC + VBP + LCD_LAYER1_HEIGHT - 1;
-		LTDC_L1WVPCR = v_stop << LTDC_LxWVPCR_WVSPPOS_SHIFT |
-			       v_start << LTDC_LxWVPCR_WVSTPOS_SHIFT;
-
-		/* The pixel input format */
-		LTDC_L1PFCR = LCD_LAYER1_PIXFORMAT;
-
-		/* The color frame buffer start address */
-		LTDC_L1CFBAR = (uint32_t)cur_frame;
-
-		/* The line length and pitch of the color frame buffer */
-		uint32_t pitch = LCD_LAYER1_WIDTH * LCD_LAYER1_PIXEL_SIZE;
-		uint32_t length = LCD_LAYER1_WIDTH * LCD_LAYER1_PIXEL_SIZE + 3;
-		LTDC_L1CFBLR = pitch << LTDC_LxCFBLR_CFBP_SHIFT |
-			       length << LTDC_LxCFBLR_CFBLL_SHIFT;
-
-		/* The number of lines of the color frame buffer */
-		LTDC_L1CFBLNR = LCD_LAYER1_HEIGHT;
-
-		/* If needed, load the CLUT */
-		/* (not using CLUT) */
-
-		/* If needed, configure the default color and blending
-		 * factors
-		 */
-		LTDC_L1CACR = 0x000000FF;
-		LTDC_L1BFCR = LTDC_LxBFCR_BF1_PIXEL_ALPHA_x_CONST_ALPHA |
-			      LTDC_LxBFCR_BF2_PIXEL_ALPHA_x_CONST_ALPHA;
-        LTDC_L1DCCR = 0x00000000;
-	}
-
-	/* Configure the Layer 2 parameters. */
+	
+    /* Configure the Layer 2 parameters. */
 	{
 		/* The Layer window horizontal and vertical position */
 		uint32_t h_start = HSYNC + HBP + 0;
@@ -279,3 +241,5 @@ void show_frame(void)
     LTDC_L1CFBAR = (uint32_t)t;
     LTDC_L2CFBAR = (uint32_t)k;
 }
+
+
