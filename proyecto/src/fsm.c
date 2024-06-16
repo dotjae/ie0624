@@ -6,6 +6,8 @@ typedef enum
 {
     MAIN_MENU,
     PVP_INIT,
+    PVM_INIT,
+    PVM,
     PVP,
     GIT
 } gameState;
@@ -15,6 +17,7 @@ typedef enum
 typedef enum
 {
     SEL_PVP,
+    SEL_PVM,
     SEL_GIT,
     __count
 } selState;
@@ -25,7 +28,15 @@ typedef enum
     INICIO3,
     INICIO2,
     INICIO1
-} pvpStart; 
+} pvpStart;
+
+// PVM countdown states
+typedef enum
+{
+    INICIO3M,
+    INICIO2M,
+    INICIO1M
+} pvmStart; 
 
 // for pong logic
 typedef struct
@@ -58,6 +69,7 @@ typedef enum
 gameState STATE = MAIN_MENU;    // Show menu at POR
 selState MENU_STATE = SEL_PVP;  // Select PVP at POR
 pvpStart PVP_START_STATE = INICIO3; // Show 'Inicio en 3' when PvP is selected
+pvmStart PVM_START_STATE = INICIO3M; // Show 'Inicio en 3' when PvP is selected
 ball_state BALL_STATE = START;
 
 // Inits
@@ -67,6 +79,7 @@ uint16_t pressedDuration    = 0;
 uint16_t pressedTime        = 0;
 uint16_t startTime          = 0;
 uint32_t deltaT             = 0;
+uint8_t agent_decision;
 
 // structs
 paddleXY Paddle1;
@@ -85,7 +98,9 @@ void menu_fsm(void)
             
             // Options
             gfx_drawBitmap(117,125,pvp);
-            gfx_drawBitmap(113,154,git);
+            // gfx_drawBitmap(90,150,pvp);
+            gfx_drawBitmap(117,150,pvp);
+            gfx_drawBitmap(113,175,git);
             
             // TODO: function to read button 
             // short press -> toggle between menu options
@@ -102,7 +117,7 @@ void menu_fsm(void)
                 
                 if (pressedDuration > 1000)
                 {
-                    STATE = (MENU_STATE == SEL_PVP) ? PVP_INIT: GIT;  // main menu only has pvp and credits options 
+                    STATE = (MENU_STATE == SEL_PVP) ? PVP_INIT: ((MENU_STATE = SEL_PVM) ? PVM_INIT : GIT);  // main menu only has pvp and credits options 
                 }
                 else
                 {
@@ -118,9 +133,13 @@ void menu_fsm(void)
                     gfx_drawBitmap(100,120,options_outline);
                     gfx_drawBitmap(117,125,pvp);
                 break;
+                case SEL_PVM:
+                    gfx_drawBitmap(100,145,options_outline);
+                    gfx_drawBitmap(117,150,pvp);
+                break;
                 case SEL_GIT:
-                    gfx_drawBitmap(100,149,options_outline);
-                    gfx_drawBitmap(113,154,git);
+                    gfx_drawBitmap(100,170,options_outline);
+                    gfx_drawBitmap(113,175,git);
                 break;
                 default:
                     MENU_STATE = SEL_PVP;
@@ -182,6 +201,63 @@ void menu_fsm(void)
             {
                 startTime = 0;
                 PVP_START_STATE = INICIO3; 
+                STATE = MAIN_MENU;
+            }
+            break;
+            case PVM_INIT:
+            /* paddles start at half screen */
+            INIT_PADDLE_Y(Paddle1);       // TODO: generalize for every round taken
+            INIT_PADDLE_Y(Paddle2); 
+            
+            // Title
+            gfx_drawBitmap(80,50,pong_outline);
+            gfx_drawBitmap(115,57,pong);
+            gfx_drawBitmap(86,68,mu);
+            
+            // 'Inicio en 3,2,1...'
+            gfx_drawBitmap(90,120,inicio_outline);
+            gfx_drawBitmap(104,135,Inicio);
+            
+            // 'Presione un botón para cancelar'
+            gfx_drawBitmap(89,191,escape);
+                
+            // TODO: after sometime a POR is done, startTime does not default to 0
+            switch (PVM_START_STATE)
+            {
+                case INICIO3M:
+                    gfx_drawBitmap(208,136,three);
+                    if (startTime == 0)
+                    {
+                        startTime = mtime();
+                    }
+                    if (mtime() - startTime > 1000)
+                    {
+                       PVM_START_STATE = INICIO2M; 
+                    }
+                break;
+                case INICIO2M:
+                    gfx_drawBitmap(208,136,two);
+                    if (mtime() - startTime > 2000)
+                    {
+                       PVM_START_STATE = INICIO1M; 
+                    }
+                break;
+                case INICIO1M:
+                    gfx_drawBitmap(208,136,one);
+                    if (mtime() - startTime > 3000)
+                    {
+                       startTime = 0;
+                       PVM_START_STATE = INICIO3M; 
+                       STATE = PVM;
+                    }
+                break;
+            }
+            
+            // poll interrupt on button -> abort pvp 
+            if (gpio_get(GPIOA,GPIO0))
+            {
+                startTime = 0;
+                PVM_START_STATE = INICIO3M; 
                 STATE = MAIN_MENU;
             }
             break;
@@ -275,6 +351,113 @@ void menu_fsm(void)
                 break;
             }
         break;
+        case PVM:
+
+            // gfx_drawBitmap(10,10,game_outline);
+            
+            /* left paddle */
+            // move paddle down
+            if (gpio_get(GPIOA,GPIO1))
+            {
+                Paddle1.y += MOV_PADDLE;
+                gpio_toggle(GPIOG,GPIO13);
+            }
+
+            // move paddle up
+            if (gpio_get(GPIOA,GPIO0))
+            {
+                Paddle1.y -= MOV_PADDLE;
+                gpio_toggle(GPIOG,GPIO14);
+            }
+            
+            if (Paddle1.y >= 165) Paddle1.y = 165;
+            if (Paddle1.y <= 15 ) Paddle1.y = 15;
+
+            gfx_fillRect(15,Paddle1.y,10,60,GFX_WHITE);
+
+            /* right paddle */
+            // move paddle down
+            // if (gpio_get(GPIOA,GPIO7) && Paddle2.y <= 165)
+            // {
+            //     Paddle2.y += MOV_PADDLE;
+            //     gpio_toggle(GPIOG,GPIO13);
+            // }
+
+            // // move paddle up
+            // if (gpio_get(GPIOA,GPIO5) && Paddle2.y > 15)
+            // {
+            //     Paddle2.y -= MOV_PADDLE;
+            //     gpio_toggle(GPIOG,GPIO14);
+            // }
+
+            // Hard-coded "dumb" agent to test.
+            agent_decision = dumb_agent(Ball.x, Ball.y, Ball.dx, Ball.dy);
+
+            switch (agent_decision)
+            {
+            case (0):
+                Paddle2.y += MOV_PADDLE;
+            break;
+            case (1):
+                Paddle2.y -= MOV_PADDLE;   
+                break;
+            default:
+                Paddle2.y = Paddle2.y;
+                break;
+            }
+
+            if (Paddle2.y >= 165) Paddle2.y = 165;
+            if (Paddle2.y <= 15 ) Paddle2.y = 15;
+
+            gfx_fillRect(295,Paddle2.y,10,60,GFX_WHITE);
+            
+            /* ball */
+            switch (BALL_STATE)
+            {
+                case START:
+                    Ball.x = 160;
+                    Ball.y = 120;
+                    Ball.dx = 5;
+                    Ball.dy = 5;
+
+                    gfx_fillCircle(Ball.x, Ball.y, 5, GFX_WHITE);
+                    BALL_STATE = FLOATING;
+                break;
+
+                // else if ((Ball.x <= 25 && (Ball.y >= Paddle1.y && Ball.y <= Paddle1.y + 60)) || (Ball.x >= 295 && (Ball.y >= Paddle2.y && Ball.y <= Paddle2.y + 60)))
+
+                case FLOATING:
+                    ball_update();
+                    // BALL_STATE = (Ball.y >= 235 || Ball.y <= 5) ? HORIZONTAL: ( (Ball.x <= 5 || Ball.x >= 315) ? SAVE : FLOATING);
+                    if (Ball.y >= 235 || Ball.y <= 5)
+                        BALL_STATE = HORIZONTAL;
+                    else if (Ball.x <= 25 || Ball.x >= 295 )
+                    {
+                        if ((Ball.x <= 25 && (Ball.y >= Paddle1.y && Ball.y <= Paddle1.y + 60)) || (Ball.x >= 295 && (Ball.y >= Paddle2.y && Ball.y <= Paddle2.y + 60)))
+                            BALL_STATE = SAVE;
+                        else 
+                            BALL_STATE = GOAL;
+                    }
+                    else 
+                        BALL_STATE = FLOATING;
+                break;
+                case SAVE:
+                    Ball.dx = -Ball.dx;
+                    ball_update();
+                    BALL_STATE = FLOATING;
+                break;
+                case GOAL:
+                    ball_update();
+                    if (Ball.x <= -10 || Ball.x >= 330)
+                        BALL_STATE = START;
+                break;
+                case HORIZONTAL:
+                    Ball.dy = -Ball.dy;
+                    ball_update();
+                    BALL_STATE = FLOATING;
+                break;
+            }
+        break;
         case GIT:
             // WIP
              milli_sleep(10000);
@@ -288,4 +471,19 @@ void ball_update()
     Ball.x += Ball.dx;
     Ball.y += Ball.dy;
     gfx_fillCircle(Ball.x, Ball.y, 5, GFX_WHITE);
+}
+
+
+uint8_t dumb_agent(int16_t x, int16_t y, int16_t dx, int16_t dy)
+{
+
+    if (dy < 0) 
+    {
+        return 1;
+    }
+    else 
+    {
+        return 0;
+    }
+
 }

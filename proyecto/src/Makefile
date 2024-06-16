@@ -11,7 +11,7 @@ CFILES += button.c clock.c console.c lcd-dma.c lcd-spi.c sdram.c
 # bitmaps #
 ###########
 # main menu
-CFILES += mu.c pong.c pvp.c git.c strings.c options_outline.c pong_outline.c 
+CFILES += mu.c pong.c pvp.c git.c strings.c options_outline.c pong_outline.c pvm.c
 
 # loading screen
 CFILES += escape.c Inicio.c one.c two.c three.c inicio_outline.c 

@@ -56,6 +56,9 @@ extern const tImage pong_outline;
 // 'Inicio(PvP)'
 extern const tImage pvp;
 
+// 'Inicio(PvM)'
+extern const tImage pvm;
+
 // Main menu strings
 extern const tImage strings;
 
