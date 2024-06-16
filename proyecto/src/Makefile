@@ -1,8 +1,9 @@
 PROJECT = firmware
 BUILD_DIR = bin
 
-# headers
+# headers and bmps
 SHARED_DIR += ../include/
+SHARED_DIR += ../bitmaps/
 
 # peripheral init files 
 CFILES += button.c clock.c console.c lcd-dma.c lcd-spi.c sdram.c 

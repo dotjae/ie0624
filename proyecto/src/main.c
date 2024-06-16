@@ -1,8 +1,4 @@
-#include "lcd-dma.h"
-#include "fsm.h"
-#include "button.h"
-
-// trying to draw a bitmap
+#include "pong.h" 
 
 int main(void)
 {

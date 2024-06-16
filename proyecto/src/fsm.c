@@ -1,64 +1,4 @@
 #include "fsm.h"
-#include <stdbool.h>
-
-// Global state definitions
-typedef enum
-{
-    MAIN_MENU,
-    PVP_INIT,
-    PVP,
-    GIT
-} gameState;
-
-// TODO: change this enum name to a more apropiate one 
-// Sub-state definitions
-typedef enum
-{
-    SEL_PVP,
-    SEL_GIT,
-    __count
-} selState;
-
-// PVP countdown states
-typedef enum
-{
-    INICIO3,
-    INICIO2,
-    INICIO1
-} pvpStart; 
-
-// for pong logic
-typedef struct
-{
-    uint16_t x,y;
-    uint16_t height;
-} paddleXY;
-
-// for ball movement
-typedef struct
-{   
-    int16_t x,y;
-    int16_t dx,dy;   
-} ballXY;
-
-// ball states
-typedef enum
-{
-    START,
-    FLOATING,
-    SAVE,
-    GOAL,
-    HORIZONTAL,
-} ball_state;
-
-#define INIT_PADDLE_Y(paddle) do{(paddle).y = 90;} while(0)  // TODO: generalize for any paddle height
-#define MOV_PADDLE 5   // pixels paddle moves while button is actioned
-
-// FSMs states
-gameState STATE = MAIN_MENU;    // Show menu at POR
-selState MENU_STATE = SEL_PVP;  // Select PVP at POR
-pvpStart PVP_START_STATE = INICIO3; // Show 'Inicio en 3' when PvP is selected
-ball_state BALL_STATE = START;
 
 // Inits
 uint16_t currentY;
@@ -67,6 +7,12 @@ uint16_t pressedDuration    = 0;
 uint16_t pressedTime        = 0;
 uint16_t startTime          = 0;
 uint32_t deltaT             = 0;
+
+// FSMs states
+gameState STATE = MAIN_MENU;    // Show menu at POR
+selState MENU_STATE = SEL_PVP;  // Select PVP at POR
+pvpStart PVP_START_STATE = INICIO3; // Show 'Inicio en 3' when PvP is selected
+ball_state BALL_STATE = START;
 
 // structs
 paddleXY Paddle1;
