@@ -132,8 +132,6 @@ void menu_fsm(void)
             }
             break;
         case PVP:
-            // gfx_drawBitmap(10,10,game_outline);
-            
             /* left paddle */
             // move paddle down
             if (gpio_get(GPIOA,GPIO1))
@@ -180,18 +178,19 @@ void menu_fsm(void)
                 case START:
                     Ball.x = 160;
                     Ball.y = 120;
-                    Ball.dx = 5;
-                    Ball.dy = 5;
+                    
+                    Ball.Dir = ball_Dir();
+
+                    // Randomize x and y velocities via randDirX randDirY
+                    Ball.dx = 5 * Ball.Dir.x;
+                    Ball.dy = 5 * Ball.Dir.y;
 
                     gfx_fillCircle(Ball.x, Ball.y, 5, GFX_WHITE);
                     BALL_STATE = FLOATING;
                 break;
 
-                // else if ((Ball.x <= 25 && (Ball.y >= Paddle1.y && Ball.y <= Paddle1.y + 60)) || (Ball.x >= 295 && (Ball.y >= Paddle2.y && Ball.y <= Paddle2.y + 60)))
-
                 case FLOATING:
                     ball_update();
-                    // BALL_STATE = (Ball.y >= 235 || Ball.y <= 5) ? HORIZONTAL: ( (Ball.x <= 5 || Ball.x >= 315) ? SAVE : FLOATING);
                     if (Ball.y >= 235 || Ball.y <= 5)
                         BALL_STATE = HORIZONTAL;
                     else if (Ball.x <= 25 || Ball.x >= 295 )
@@ -234,4 +233,26 @@ void ball_update()
     Ball.x += Ball.dx;
     Ball.y += Ball.dy;
     gfx_fillCircle(Ball.x, Ball.y, 5, GFX_WHITE);
+}
+
+dir ball_Dir(void)
+{
+    dir Dir;
+    int16_t dirX = random_int() % 2;
+    int16_t dirY = random_int() % 2;
+
+    if (dirX == 0) 
+        dirX = -1;
+    else 
+        dirX = 1;
+
+    if (dirY == 0) 
+        dirY = -1;
+    else 
+        dirY = 1;
+    
+    Dir.x = dirX;
+    Dir.y = dirY;
+
+    return Dir;
 }

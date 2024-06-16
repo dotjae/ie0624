@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <libopencm3/stm32/gpio.h>
 #include "clock.h"
+#include "random.h"
 #include "lcd-spi.h"
 #include "gfx.h"
 #include "images.h"
@@ -43,10 +44,17 @@ typedef struct
 } paddleXY;
 
 // for ball movement
+
+typedef struct
+{
+    int16_t x, y;
+} dir;
+
 typedef struct
 {   
     int16_t x,y;
     int16_t dx,dy;   
+    dir Dir;
 } ballXY;
 
 // ball states
@@ -66,5 +74,6 @@ typedef enum
 // function definitions
 void menu_fsm(void);
 void ball_update(void);
+dir ball_Dir(void);
 
 #endif
