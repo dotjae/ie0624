@@ -9,6 +9,8 @@ pvpStart PVP_START_STATE = INICIO3;     // Show 'Inicio en 3' when PvP is select
 pvmStart PVM_START_STATE = INICIO3M;    // Show 'Inicio en 3' when PvP is selected
 ball_state BALL_STATE = START;
 press_state PRESS_STATE = NOT_PRESS;    // for button press timing
+git_state GIT_STATE = LOGOS;
+
 // =======
 // >>>>>>> 6f0a411e868b1ce56e7eab600fc88595ccbf73ec
 
@@ -437,9 +439,44 @@ void menu_fsm(void)
             }
         break;
         case GIT:
-            // WIP
-             milli_sleep(10000);
-            STATE = MAIN_MENU;
+            gfx_fillScreen(GFX_BLACK);
+            switch (GIT_STATE)
+            {
+                case LOGOS:
+                    gfx_box(100,200,120,20,4,1);
+                    gfx_setCursor(152,205);
+                    gfx_puts("Ok");
+
+                    if (gpio_get(GPIOA, GPIO0))
+                    {
+                            GIT_STATE = CREDITS;
+                            milli_sleep(10);
+                    }
+                break;
+                case CREDITS:
+                    gfx_box(100,200,120,20,4,1);
+                    gfx_setCursor(152,205);
+                    gfx_puts("Ok");
+
+                    if (gpio_get(GPIOA, GPIO0))
+                    {
+                            GIT_STATE = GIT_QR;
+                            milli_sleep(10);
+                    }
+                break;
+                case GIT_QR:
+                    gfx_box(100,200,120,20,4,1);
+                    gfx_setCursor(152,205);
+                    gfx_puts("Ok");
+
+                    if (gpio_get(GPIOA, GPIO0))
+                    {
+                            GIT_STATE = CREDITS;
+                            STATE = MAIN_MENU;
+                            milli_sleep(10);
+                    }
+                break;
+            }
         break;
     }
 }

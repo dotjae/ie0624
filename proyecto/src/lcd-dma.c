@@ -220,8 +220,8 @@ void lcd_tft_isr(void)
 void draw_pixel(int x, int y, uint32_t color)
 {
     // invert coords, could not find how to do this with regs and DMA
-    x = 319 - x;           
-    y = 239 - y;           
+    //x = 319 - x;           
+    //y = 239 - y;           
 
     size_t i = x * LCD_WIDTH + y;   
     layer1_pixel pix = color;

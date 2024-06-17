@@ -86,6 +86,14 @@ typedef enum
     LONG_PRESS,
 } press_state;
 
+// git menu states
+typedef enum
+{
+    LOGOS,
+    CREDITS,
+    GIT_QR,
+} git_state;
+
 #define INIT_PADDLE_Y(paddle) do{(paddle).y = 90;} while(0)  // TODO: generalize for any paddle height
 #define MOV_PADDLE 5   // pixels paddle moves while button is actioned
 #define LINE_HEIGHT 20
