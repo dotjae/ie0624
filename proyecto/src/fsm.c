@@ -3,20 +3,18 @@
 #include <stdbool.h>
 
 // FSMs states
-gameState STATE = MAIN_MENU;    // Show menu at POR
-selState MENU_STATE = SEL_PVP;  // Select PVP at POR
-pvpStart PVP_START_STATE = INICIO3; // Show 'Inicio en 3' when PvP is selected
-pvmStart PVM_START_STATE = INICIO3M; // Show 'Inicio en 3' when PvP is selected
+gameState STATE = MAIN_MENU;            // Show menu at POR
+selState MENU_STATE = SEL_PVP;          // Select PVP at POR
+pvpStart PVP_START_STATE = INICIO3;     // Show 'Inicio en 3' when PvP is selected
+pvmStart PVM_START_STATE = INICIO3M;    // Show 'Inicio en 3' when PvP is selected
 ball_state BALL_STATE = START;
+press_state PRESS_STATE = NOT_PRESS;    // for button press timing
 // =======
 // >>>>>>> 6f0a411e868b1ce56e7eab600fc88595ccbf73ec
 
 // Inits
 uint16_t currentY;
-uint16_t cycleEnum          = 0;
-uint16_t pressedDuration    = 0;
-uint16_t pressedTime        = 0;
-uint16_t startTime          = 0;
+uint32_t startTime          = 0;
 uint32_t deltaT             = 0;
 uint8_t agent_decision;
 
@@ -33,61 +31,95 @@ ballXY Ball;
 
 void menu_fsm(void)
 {
+    gfx_setTextColor(GFX_WHITE,GFX_BLACK);
     switch (STATE)
     {
         case MAIN_MENU:
             // Title
-            gfx_drawBitmap(80,50,pong_outline);
-            gfx_drawBitmap(115,57,pong);
-            gfx_drawBitmap(86,68,mu);
+            gfx_box(80,50,170,50,4,1);
+            gfx_setCursor(86,57);
+            gfx_setTextSize(4); 
+            gfx_puts("~Pong");
             
             // Options
-            gfx_drawBitmap(117,125,pvp);
-            // gfx_drawBitmap(90,150,pvp);
-            gfx_drawBitmap(117,150,pvp);
-            gfx_drawBitmap(113,175,git);
+            gfx_setTextSize(1); 
+
+            gfx_setCursor(113,125);
+            gfx_puts("Modo PvP");
+
+            gfx_setCursor(113,150);
+            gfx_puts("Modo PvM");
+
+            gfx_setCursor(113,175);
+            gfx_puts("Creditos/Git");
             
-            // TODO: function to read button 
-            // short press -> toggle between menu options
-            // long press  -> access a menu option
-            // this should be a fsm
-            if (gpio_get(GPIOA,GPIO0))
-            {
-                pressedTime = mtime();
-                
-                while (gpio_get(GPIOA,GPIO0)) 
-                {
-                    pressedDuration = mtime() - pressedTime;   
-                }
-                
-                if (pressedDuration > 1000)
-                {
-                    STATE = (MENU_STATE == SEL_PVP) ? PVP_INIT: ((MENU_STATE = SEL_PVM) ? PVM_INIT : GIT);  // main menu only has pvp and credits options 
-                }
-                else
-                {
-                    MENU_STATE = (selState)((cycleEnum += 1) % __count);   // cyclic enum, for menu state transitions
-                    milli_sleep(10);
-                }
-            }
 
             // Selection
             switch (MENU_STATE)
             {
                 case SEL_PVP:
-                    gfx_drawBitmap(100,120,options_outline);
-                    gfx_drawBitmap(117,125,pvp);
+                    gfx_box(100,120,120,20,4,1);
+                    gfx_setCursor(117,125);
+                    gfx_puts("Modo PvP");
+                    
+                    switch (PRESS_STATE)
+                    {
+                        case NOT_PRESS:
+                            PRESS_STATE = long_press();
+                        break;
+                        case SHORT_PRESS:
+                            MENU_STATE = SEL_PVM;
+                            PRESS_STATE = NOT_PRESS;
+                            milli_sleep(10);
+                        break;
+                        case LONG_PRESS:
+                            STATE = PVP_INIT;
+                            PRESS_STATE = NOT_PRESS;
+                        break;
+                    }
                 break;
                 case SEL_PVM:
-                    gfx_drawBitmap(100,145,options_outline);
-                    gfx_drawBitmap(117,150,pvp);
+                    gfx_box(100,145,120,20,4,1);
+                    gfx_setCursor(117,150);
+                    gfx_puts("Modo PvM");
+                    
+                    switch (PRESS_STATE)
+                    {
+                        case NOT_PRESS:
+                            PRESS_STATE = long_press();
+                        break;
+                        case SHORT_PRESS:
+                            MENU_STATE = SEL_GIT;
+                            PRESS_STATE = NOT_PRESS;
+                            milli_sleep(10);
+                        break;
+                        case LONG_PRESS:
+                            STATE = PVM_INIT;
+                            PRESS_STATE = NOT_PRESS;
+                        break;
+                    }
                 break;
                 case SEL_GIT:
-                    gfx_drawBitmap(100,170,options_outline);
-                    gfx_drawBitmap(113,175,git);
-                break;
-                default:
-                    MENU_STATE = SEL_PVP;
+                    gfx_box(100,170,120,20,4,1);
+                    gfx_setCursor(117,175);
+                    gfx_puts("Creditos/Git");
+
+                    switch (PRESS_STATE)
+                    {
+                        case NOT_PRESS:
+                            PRESS_STATE = long_press();
+                        break;
+                        case SHORT_PRESS:
+                            MENU_STATE = SEL_PVP;
+                            PRESS_STATE = NOT_PRESS;
+                            milli_sleep(10);
+                        break;
+                        case LONG_PRESS:
+                            STATE = GIT;
+                            PRESS_STATE = NOT_PRESS;
+                        break;
+                    }
+
                 break;
             }
         break;
@@ -98,9 +130,10 @@ void menu_fsm(void)
             INIT_PADDLE_Y(Paddle2); 
             
             // Title
-            gfx_drawBitmap(80,50,pong_outline);
-            gfx_drawBitmap(115,57,pong);
-            gfx_drawBitmap(86,68,mu);
+            gfx_box(80,50,170,50,4,1);
+            gfx_setCursor(86,57);
+            gfx_setTextSize(4); 
+            gfx_puts("~Pong");
             
             // 'Inicio en 3,2,1...'
             gfx_drawBitmap(90,120,inicio_outline);
@@ -155,10 +188,11 @@ void menu_fsm(void)
             INIT_PADDLE_Y(Paddle2); 
             
             // Title
-            gfx_drawBitmap(80,50,pong_outline);
-            gfx_drawBitmap(115,57,pong);
-            gfx_drawBitmap(86,68,mu);
-            
+            gfx_box(80,50,170,50,4,1);
+            gfx_setCursor(86,57);
+            gfx_setTextSize(4); 
+            gfx_puts("~Pong");
+
             // 'Inicio en 3,2,1...'
             gfx_drawBitmap(90,120,inicio_outline);
             gfx_drawBitmap(104,135,Inicio);
@@ -454,3 +488,22 @@ dir ball_Dir(void)
     return Dir;
 }
 // >>>>>>> 6f0a411e868b1ce56e7eab600fc88595ccbf73ec
+
+
+int long_press(void)
+{
+    uint32_t pressedTime = 0, pressedDuration = 0;
+    if (gpio_get(GPIOA,GPIO0))
+    {
+        pressedTime = mtime();
+    
+        while (gpio_get(GPIOA,GPIO0)) 
+            pressedDuration = mtime() - pressedTime;   
+    
+        if (pressedDuration > 1000)
+            return LONG_PRESS;
+        else 
+            return SHORT_PRESS;
+    }
+    return NOT_PRESS;
+}

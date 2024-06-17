@@ -38,6 +38,7 @@
  */
 
 #include "gfx.h"
+#include "font.c"
 
 #define pgm_read_double_word(addr) (*(const uint32_t *)(addr))
 
@@ -181,4 +182,136 @@ void gfx_fillCircleHelper(int16_t x0, int16_t y0, int16_t r,
 	}
 }
 
+/* Fill a rounded rectangle */
+void gfx_fillRoundRect(int16_t x, int16_t y, int16_t w,
+		       int16_t h, int16_t r, uint32_t color) {
+	/* smarter version */
+	gfx_fillRect(x + r, y, w - 2 * r, h, color);
 
+	/* draw four corners */
+	gfx_fillCircleHelper(x + w - r - 1, y + r, r, 1, h - 2 * r - 1, color);
+	gfx_fillCircleHelper(x + r        , y + r, r, 2, h - 2 * r - 1, color);
+}
+
+void gfx_box(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, int16_t line_w)
+{
+    gfx_fillRoundRect(x,y,w,h,r,GFX_WHITE);
+    gfx_fillRoundRect(x + line_w, y + line_w, w - 2 * line_w, h - 2 * line_w, r, GFX_BLACK);
+}
+
+/* Draw a character */
+void gfx_drawChar(int16_t x, int16_t y, unsigned char c,
+		  uint32_t color, uint32_t bg, uint8_t size)
+{
+	int8_t i, j, column;
+	const char (*glyph)[8] = char_addr[c - 32];
+
+	// descender = (*glyph & 0x80) != 0;
+
+    for (i = 0; i < 8; i++) {
+        column = (*glyph)[i];
+               
+		for (j = 0; j < 8; j++) {
+			if (column & 0x01) {
+				if (size == 1) /* default size */
+					gfx_drawPixel(x+i, y+j, color);
+				else {  /* big size */
+					gfx_fillRect(x+(i*size), y+(j*size),
+						     size, size, color);
+				}
+			} else if (bg != color) {
+				if (size == 1) /* default size */
+					gfx_drawPixel(x+i, y+j, bg);
+				else {  /* big size */
+					gfx_fillRect(x+i*size, y+j*size,
+						     size, size, bg);
+				}
+			}
+			column >>= 1;
+		}
+	}
+}
+
+void gfx_write(uint8_t c)
+{
+	if (c == '\n') {
+		__gfx_state.cursor_y += __gfx_state.textsize * 12;
+		__gfx_state.cursor_x  = 0;
+	} else if (c == '\r') {
+		/* skip em */
+	} else {
+		gfx_drawChar(__gfx_state.cursor_x, __gfx_state.cursor_y,
+			     c, __gfx_state.textcolor, __gfx_state.textbgcolor,
+			     __gfx_state.textsize);
+		__gfx_state.cursor_x += __gfx_state.textsize * 8;
+		if (__gfx_state.wrap &&
+		    (__gfx_state.cursor_x > (__gfx_state._width -
+					     __gfx_state.textsize*8))) {
+			__gfx_state.cursor_y += __gfx_state.textsize * 12;
+			__gfx_state.cursor_x = 0;
+		}
+	}
+}
+
+void gfx_puts(char *s)
+{
+	while (*s) {
+		gfx_write(*s);
+		s++;
+	}
+}
+
+void gfx_setCursor(int16_t x, int16_t y)
+{
+	__gfx_state.cursor_x = x;
+	__gfx_state.cursor_y = y;
+}
+
+void gfx_setTextSize(uint8_t s)
+{
+	__gfx_state.textsize = (s > 0) ? s : 1;
+}
+
+void gfx_setTextColor(uint32_t color, uint32_t bg)
+{
+	__gfx_state.textcolor   = color;
+	__gfx_state.textbgcolor = bg;
+}
+
+void gfx_setTextWrap(uint8_t w)
+{
+	__gfx_state.wrap = w;
+}
+
+uint8_t gfx_getRotation(void)
+{
+	return __gfx_state.rotation;
+}
+
+void gfx_setRotation(uint8_t x)
+{
+	__gfx_state.rotation = (x & 3);
+	switch (__gfx_state.rotation) {
+	case 0:
+	case 2:
+		__gfx_state._width  = GFX_WIDTH;
+		__gfx_state._height = GFX_HEIGHT;
+		break;
+	case 1:
+	case 3:
+		__gfx_state._width  = GFX_HEIGHT;
+		__gfx_state._height = GFX_WIDTH;
+		break;
+	}
+}
+
+/* Return the size of the display (per current rotation) */
+uint16_t gfx_width(void)
+{
+	return __gfx_state._width;
+}
+
+uint16_t gfx_height(void)
+{
+	return __gfx_state._height;
+}
