@@ -319,23 +319,8 @@ void menu_fsm(void)
 
             gfx_fillRect(15,Paddle1.y,10,60,GFX_WHITE);
 
-            /* right paddle */
-            // move paddle down
-            // if (gpio_get(GPIOA,GPIO7) && Paddle2.y <= 165)
-            // {
-            //     Paddle2.y += MOV_PADDLE;
-            //     gpio_toggle(GPIOG,GPIO13);
-            // }
-
-            // // move paddle up
-            // if (gpio_get(GPIOA,GPIO5) && Paddle2.y > 15)
-            // {
-            //     Paddle2.y -= MOV_PADDLE;
-            //     gpio_toggle(GPIOG,GPIO14);
-            // }
-
             // Hard-coded "dumb" agent to test.
-            agent_decision = dumb_agent(Ball.x, Ball.y, Ball.dx, Ball.dy);
+            agent_decision = dumb_agent(Paddle2.y, Ball.dy, Ball.dx);
 
             switch (agent_decision)
             {
@@ -361,18 +346,19 @@ void menu_fsm(void)
                 case START:
                     Ball.x = 160;
                     Ball.y = 120;
-                    Ball.dx = 5;
-                    Ball.dy = 5;
+                    
+                    Ball.Dir = ball_Dir();
+
+                    // Randomize x and y velocities via randDirX randDirY
+                    Ball.dx = 5 * Ball.Dir.x;
+                    Ball.dy = 5 * Ball.Dir.y;
 
                     gfx_fillCircle(Ball.x, Ball.y, 5, GFX_WHITE);
                     BALL_STATE = FLOATING;
                 break;
 
-                // else if ((Ball.x <= 25 && (Ball.y >= Paddle1.y && Ball.y <= Paddle1.y + 60)) || (Ball.x >= 295 && (Ball.y >= Paddle2.y && Ball.y <= Paddle2.y + 60)))
-
                 case FLOATING:
                     ball_update();
-                    // BALL_STATE = (Ball.y >= 235 || Ball.y <= 5) ? HORIZONTAL: ( (Ball.x <= 5 || Ball.x >= 315) ? SAVE : FLOATING);
                     if (Ball.y >= 235 || Ball.y <= 5)
                         BALL_STATE = HORIZONTAL;
                     else if (Ball.x <= 25 || Ball.x >= 295 )
@@ -419,16 +405,33 @@ void ball_update()
 
 // <<<<<<< HEAD
 
-uint8_t dumb_agent(int16_t x, int16_t y, int16_t dx, int16_t dy)
+uint8_t dumb_agent(uint16_t paddle_y, int16_t ball_dy, int16_t ball_dx)
 {
 
-    if (dy < 0) 
+
+    if (ball_dx > 0 && ball_dy < 0)
     {
+        if (paddle_y > 250){
+            return 0;
+        }
+        else 
+        {
         return 1;
+        }
     }
-    else 
+    else if (ball_dx > 0 && ball_dy > 0)
     {
+        if (paddle_y < 70){
+            return 1;
+        }
+        else 
+        {
         return 0;
+        }
+    }
+    else
+    {
+        return 2;
     }
 }
 // =======
