@@ -78,6 +78,22 @@ typedef enum
     HORIZONTAL,
 } ball_state;
 
+// long-short press states
+typedef enum
+{
+    NOT_PRESS,
+    SHORT_PRESS,
+    LONG_PRESS,
+} press_state;
+
+// git menu states
+typedef enum
+{
+    LOGOS,
+    CREDITS,
+    GIT_QR,
+} git_state;
+
 #define INIT_PADDLE_Y(paddle) do{(paddle).y = 90;} while(0)  // TODO: generalize for any paddle height
 #define MOV_PADDLE 5   // pixels paddle moves while button is actioned
 #define LINE_HEIGHT 20
@@ -87,5 +103,6 @@ void menu_fsm(void);
 void ball_update(void);
 uint8_t dumb_agent(uint16_t paddle_y, int16_t ball_dy, int16_t ball_dx);
 dir ball_Dir(void);
+int long_press(void);
 
 #endif

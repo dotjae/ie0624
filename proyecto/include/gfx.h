@@ -24,7 +24,21 @@ void gfx_drawBitmap(int16_t x, int16_t y, tImage bmp);
 void gfx_fillCircle(int16_t x0, int16_t y0, int16_t r,
 		    uint32_t color);
 void gfx_fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int16_t delta, uint32_t color);
-
+void gfx_drawChar(int16_t x, int16_t y, unsigned char c,
+		  uint32_t color, uint32_t bg, uint8_t size);
+void gfx_write(uint8_t c);
+void gfx_puts(char *s);
+void gfx_setCursor(int16_t x, int16_t y);
+void gfx_setTextSize(uint8_t s);
+void gfx_setTextColor(uint32_t color, uint32_t bg);
+void gfx_setTextWrap(uint8_t w);
+uint8_t gfx_getRotation(void);
+void gfx_setRotation(uint8_t x);
+uint16_t gfx_width(void);
+uint16_t gfx_height(void);
+void gfx_fillRoundRect(int16_t x, int16_t y, int16_t w,
+		       int16_t h, int16_t r, uint32_t color);
+void gfx_box(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, int16_t line_w);
 #define GFX_WIDTH   320
 #define GFX_HEIGHT  240
 
