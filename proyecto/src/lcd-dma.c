@@ -149,7 +149,7 @@ void lcd_dma_init(void)
 	LTDC_GCR |= LTDC_GCR_PCPOL_ACTIVE_HIGH;
 
 	/* If needed, configure the background color. */
-	LTDC_BCCR = 0x00000000;
+	LTDC_BCCR = 0x00;
     
 	LTDC_IER = LTDC_IER_RRIE;
 	nvic_enable_irq(NVIC_LCD_TFT_IRQ);   // deshabilitar interrupciones
@@ -217,7 +217,7 @@ void lcd_tft_isr(void)
 	LTDC_SRCR |= LTDC_SRCR_VBR;
 }
 
-void draw_pixel(int x, int y, uint32_t color)
+void draw_pixel(int x, int y, uint8_t color)
 {
     // invert coords, could not find how to do this with regs and DMA
     //x = 319 - x;           
@@ -230,8 +230,8 @@ void draw_pixel(int x, int y, uint32_t color)
 
 void show_frame(void)
 {
-    uint32_t *t;
-    uint32_t *k;
+    uint8_t *t;
+    uint8_t *k;
 
     t = display_frame;
     k = cur_frame;

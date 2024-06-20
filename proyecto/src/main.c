@@ -24,7 +24,7 @@ int main(void)
 
     /* set up graphics lib */
     gfx_init(draw_pixel, 320, 240);
-
+    
 	while (1) {
         gfx_fillScreen(GFX_BLACK);
         menu_fsm();

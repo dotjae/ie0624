@@ -40,12 +40,12 @@
 #include "gfx.h"
 #include "font.c"
 
-#define pgm_read_double_word(addr) (*(const uint32_t *)(addr))
+#define pgm_read_double_word(addr) (*(const uint8_t *)(addr))
 
 struct gfx_state __gfx_state;
 
 void
-gfx_drawPixel(int x, int y, uint32_t color)
+gfx_drawPixel(int x, int y, uint8_t color)
 {
 	if ((x < 0) || (x >= __gfx_state._width) ||
 	    (y < 0) || (y >= __gfx_state._height)) {
@@ -56,7 +56,7 @@ gfx_drawPixel(int x, int y, uint32_t color)
 #define true 1
 
 void
-gfx_init(void (*pixel_func)(int, int, uint32_t), int width, int height)
+gfx_init(void (*pixel_func)(int, int, uint8_t), int width, int height)
 {
 	__gfx_state._width    = width;
 	__gfx_state._height   = height;
@@ -64,7 +64,7 @@ gfx_init(void (*pixel_func)(int, int, uint32_t), int width, int height)
 	__gfx_state.cursor_y  = __gfx_state.cursor_x    = 0;
 	__gfx_state.textsize  = 1;
 	__gfx_state.textcolor = 0;
-	__gfx_state.textbgcolor = 0xffffffff;
+	__gfx_state.textbgcolor = 0xff;
 	__gfx_state.wrap      = true;
 	__gfx_state.drawpixel = pixel_func;
 }
@@ -73,7 +73,7 @@ gfx_init(void (*pixel_func)(int, int, uint32_t), int width, int height)
 /* Bresenham's algorithm - thx wikpedia */
 void gfx_drawLine(int16_t x0, int16_t y0,
 			    int16_t x1, int16_t y1,
-			    uint32_t color)
+			    uint8_t color)
 {
 	int16_t steep = abs(y1 - y0) > abs(x1 - x0);
 	if (steep) {
@@ -114,14 +114,14 @@ void gfx_drawLine(int16_t x0, int16_t y0,
 }
 
 void gfx_drawFastVLine(int16_t x, int16_t y,
-		       int16_t h, uint32_t color)
+		       int16_t h, uint8_t color)
 {
 	/* Update in subclasses if desired! */
 	gfx_drawLine(x, y, x, y + h - 1, color);
 }
 
 void gfx_fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
-		  uint32_t color)
+		  uint8_t color)
 {
 	/* Update in subclasses if desired! */
 	int16_t i;
@@ -130,7 +130,7 @@ void gfx_fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
 	}
 }
 
-void gfx_fillScreen(uint32_t color)
+void gfx_fillScreen(uint8_t color)
 {
 	gfx_fillRect(0, 0, __gfx_state._width, __gfx_state._height, color);
 }
@@ -145,7 +145,7 @@ void gfx_drawBitmap(int16_t x, int16_t y, tImage bmp)
 }
 
 void gfx_fillCircle(int16_t x0, int16_t y0, int16_t r,
-		    uint32_t color)
+		    uint8_t color)
 {
 	gfx_drawFastVLine(x0, y0 - r, 2*r+1, color);
 	gfx_fillCircleHelper(x0, y0, r, 3, 0, color);
@@ -153,7 +153,7 @@ void gfx_fillCircle(int16_t x0, int16_t y0, int16_t r,
 
 /* Used to do circles and roundrects */
 void gfx_fillCircleHelper(int16_t x0, int16_t y0, int16_t r,
-			  uint8_t cornername, int16_t delta, uint32_t color)
+			  uint8_t cornername, int16_t delta, uint8_t color)
 {
 	int16_t f     = 1 - r;
 	int16_t ddF_x = 1;
@@ -184,7 +184,7 @@ void gfx_fillCircleHelper(int16_t x0, int16_t y0, int16_t r,
 
 /* Fill a rounded rectangle */
 void gfx_fillRoundRect(int16_t x, int16_t y, int16_t w,
-		       int16_t h, int16_t r, uint32_t color) {
+		       int16_t h, int16_t r, uint8_t color) {
 	/* smarter version */
 	gfx_fillRect(x + r, y, w - 2 * r, h, color);
 
@@ -201,7 +201,7 @@ void gfx_box(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, int16_t line
 
 /* Draw a character */
 void gfx_drawChar(int16_t x, int16_t y, unsigned char c,
-		  uint32_t color, uint32_t bg, uint8_t size)
+		  uint32_t color, uint8_t bg, uint8_t size)
 {
 	int8_t i, j, column;
 	const char (*glyph)[8] = char_addr[c - 32];
@@ -272,7 +272,7 @@ void gfx_setTextSize(uint8_t s)
 	__gfx_state.textsize = (s > 0) ? s : 1;
 }
 
-void gfx_setTextColor(uint32_t color, uint32_t bg)
+void gfx_setTextColor(uint8_t color, uint8_t bg)
 {
 	__gfx_state.textcolor   = color;
 	__gfx_state.textbgcolor = bg;

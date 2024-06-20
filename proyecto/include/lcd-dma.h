@@ -12,7 +12,6 @@
 #include "console.h"
 #include "lcd-spi.h"
 #include "sdram.h"
-#include "gfx.h"
 
 #define LCD_WIDTH  240
 #define LCD_HEIGHT 320
@@ -28,22 +27,22 @@
 
 // Double buffering with layer1 and layer2.
 // Layer2 is being displayed, layer2 is being built
-typedef uint32_t layer1_pixel;
-#define LCD_LAYER1_PIXFORMAT LTDC_LxPFCR_ARGB8888
+typedef uint8_t layer1_pixel;
+#define LCD_LAYER1_PIXFORMAT LTDC_LxPFCR_AL44
 #define LCD_LAYER1_PIXEL_SIZE (sizeof(layer1_pixel))
 #define LCD_LAYER1_WIDTH  LCD_WIDTH
 #define LCD_LAYER1_HEIGHT LCD_HEIGHT
 #define LCD_LAYER1_PIXELS (LCD_LAYER1_WIDTH * LCD_LAYER1_HEIGHT)
 #define LCD_LAYER1_BYTES  (LCD_LAYER1_PIXELS * LCD_LAYER1_PIXEL_SIZE)
 
-typedef uint32_t layer2_pixel;
-#define LCD_LAYER2_PIXFORMAT LTDC_LxPFCR_ARGB8888
+typedef uint8_t layer2_pixel;
+#define LCD_LAYER2_PIXFORMAT LTDC_LxPFCR_AL44
 #define LCD_LAYER2_PIXEL_SIZE (sizeof(layer2_pixel))
 #define LCD_LAYER2_WIDTH  LCD_WIDTH
 #define LCD_LAYER2_HEIGHT LCD_HEIGHT
 #define LCD_LAYER2_PIXELS (LCD_LAYER2_WIDTH * LCD_LAYER2_HEIGH)
 #define LCD_LAYER2_BYTES (LCD_LAYER2_PIXELS * LCD_LAYER2_PIXEL_SIZE)
 
-void draw_pixel(int x, int y, uint32_t color);
+void draw_pixel(int x, int y, uint8_t color);
 void lcd_dma_init(void);
 void show_frame(void);
