@@ -8,17 +8,6 @@ SHARED_DIR += ../bitmaps/
 # peripheral init files 
 CFILES += button.c clock.c console.c lcd-dma.c lcd-spi.c sdram.c random.c
 
-###########
-# bitmaps #
-###########
-# loading screen
-CFILES += escape.c Inicio.c one.c two.c three.c inicio_outline.c 
-
-# Credits/Git
-
-# gameplay
-CFILES += paddle.c game_outline.c 
-
 # source code 
 CFILES += fsm.c gfx.c main.c 
 

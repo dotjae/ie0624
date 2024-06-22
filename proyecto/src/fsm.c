@@ -138,17 +138,25 @@ void menu_fsm(void)
             gfx_puts("~Pong");
             
             // 'Inicio en 3,2,1...'
-            gfx_drawBitmap(90,120,inicio_outline);
-            gfx_drawBitmap(104,135,Inicio);
+            gfx_box(90,120,140,50,4,1);
+            gfx_setCursor(104,135);
+            gfx_setTextSize(2); 
+            gfx_puts("Inicio");
             
             // 'Presione un botón para cancelar'
-            gfx_drawBitmap(89,191,escape);
+            gfx_box(90,190,140,30,4,1);
+            gfx_setCursor(93,195);
+            gfx_setTextSize(1); 
+            gfx_puts("Presione un boton");
+            gfx_setCursor(105,206);
+            gfx_puts("para cancelar");
                 
-            // TODO: after sometime a POR is done, startTime does not default to 0
+            gfx_setCursor(208,136);
+            gfx_setTextSize(2); 
             switch (PVP_START_STATE)
             {
                 case INICIO3:
-                    gfx_drawBitmap(208,136,three);
+                    gfx_puts("3");
                     if (startTime == 0)
                     {
                         startTime = mtime();
@@ -159,14 +167,14 @@ void menu_fsm(void)
                     }
                 break;
                 case INICIO2:
-                    gfx_drawBitmap(208,136,two);
+                    gfx_puts("2");
                     if (mtime() - startTime > 2000)
                     {
                        PVP_START_STATE = INICIO1; 
                     }
                 break;
                 case INICIO1:
-                    gfx_drawBitmap(208,136,one);
+                    gfx_puts("1");
                     if (mtime() - startTime > 3000)
                     {
                        startTime = 0;
@@ -188,25 +196,33 @@ void menu_fsm(void)
             /* paddles start at half screen */
             INIT_PADDLE_Y(Paddle1);       // TODO: generalize for every round taken
             INIT_PADDLE_Y(Paddle2); 
-            
+ 
             // Title
             gfx_box(80,50,170,50,4,1);
             gfx_setCursor(86,57);
             gfx_setTextSize(4); 
             gfx_puts("~Pong");
-
+            
             // 'Inicio en 3,2,1...'
-            gfx_drawBitmap(90,120,inicio_outline);
-            gfx_drawBitmap(104,135,Inicio);
+            gfx_box(90,120,140,50,4,1);
+            gfx_setCursor(104,135);
+            gfx_setTextSize(2); 
+            gfx_puts("Inicio");
             
             // 'Presione un botón para cancelar'
-            gfx_drawBitmap(89,191,escape);
+            gfx_box(90,190,140,30,4,1);
+            gfx_setCursor(93,195);
+            gfx_setTextSize(1); 
+            gfx_puts("Presione un boton");
+            gfx_setCursor(105,206);
+            gfx_puts("para cancelar");
                 
-            // TODO: after sometime a POR is done, startTime does not default to 0
+            gfx_setCursor(208,136);
+            gfx_setTextSize(2); 
             switch (PVM_START_STATE)
             {
                 case INICIO3M:
-                    gfx_drawBitmap(208,136,three);
+                    gfx_puts("3");
                     if (startTime == 0)
                     {
                         startTime = mtime();
@@ -217,14 +233,14 @@ void menu_fsm(void)
                     }
                 break;
                 case INICIO2M:
-                    gfx_drawBitmap(208,136,two);
+                    gfx_puts("2");
                     if (mtime() - startTime > 2000)
                     {
                        PVM_START_STATE = INICIO1M; 
                     }
                 break;
                 case INICIO1M:
-                    gfx_drawBitmap(208,136,one);
+                    gfx_puts("1");
                     if (mtime() - startTime > 3000)
                     {
                        startTime = 0;
