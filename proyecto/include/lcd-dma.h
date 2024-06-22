@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 #include <libopencm3/cm3/nvic.h>
 #include <libopencm3/stm32/rcc.h>
@@ -40,9 +41,10 @@ typedef uint8_t layer2_pixel;
 #define LCD_LAYER2_PIXEL_SIZE (sizeof(layer2_pixel))
 #define LCD_LAYER2_WIDTH  LCD_WIDTH
 #define LCD_LAYER2_HEIGHT LCD_HEIGHT
-#define LCD_LAYER2_PIXELS (LCD_LAYER2_WIDTH * LCD_LAYER2_HEIGH)
+#define LCD_LAYER2_PIXELS (LCD_LAYER2_WIDTH * LCD_LAYER2_HEIGHT)
 #define LCD_LAYER2_BYTES (LCD_LAYER2_PIXELS * LCD_LAYER2_PIXEL_SIZE)
 
 void draw_pixel(int x, int y, uint8_t color);
 void lcd_dma_init(void);
 void show_frame(void);
+void blacken_frame(void);

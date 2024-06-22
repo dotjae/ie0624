@@ -1,3 +1,4 @@
+import argparse
 import serial
 import time
 
@@ -20,8 +21,13 @@ def read_from_serial(port, baudrate):
         ser.close()
 
 if __name__ == "__main__":
-    serial_port = '/dev/ttyACM12'  # Replace with your actual serial port
-    baud_rate = 115200  # This value is actually ignored for USB CDC but is required to open the port
+    parser = argparse.ArgumentParser(description='Read data from a specified serial port.')
+    parser.add_argument('port', type=str, help='Serial port identifier (e.g., /dev/ttyACM0)')
+    parser.add_argument('--baud', type=int, default=115200, help='Baud rate (default: 115200)')
+    
+    args = parser.parse_args()
+    
+    serial_port = args.port
+    baud_rate = args.baud
 
     read_from_serial(serial_port, baud_rate)
-

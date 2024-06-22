@@ -6,3 +6,4 @@
 #include "button.h"
 #include "gfx.h"
 #include "fsm.h"
+#include "usb.h"

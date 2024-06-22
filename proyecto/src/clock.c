@@ -63,10 +63,10 @@ uint32_t mtime(void)
 void clock_setup(void)
 {
 	/* Base board frequency, set to 168Mhz */
-	rcc_clock_setup_pll(&rcc_hse_8mhz_3v3[RCC_CLOCK_3V3_168MHZ]);
+	rcc_clock_setup_pll(&rcc_hse_8mhz_3v3[RCC_CLOCK_3V3_180MHZ]);
 
 	/* clock rate / 168000 to get 1mS interrupt rate */
-	systick_set_reload(168000);
+	systick_set_reload(180000);
 	systick_set_clocksource(STK_CSR_CLKSOURCE_AHB);
 	systick_counter_enable();
 

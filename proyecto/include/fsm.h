@@ -27,8 +27,7 @@ typedef enum
 {
     SEL_PVP,
     SEL_PVM,
-    SEL_GIT,
-    __count
+    SEL_GIT
 } selState;
 
 // PVP countdown states

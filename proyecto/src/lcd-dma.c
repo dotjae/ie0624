@@ -3,7 +3,7 @@
 layer1_pixel* cur_frame = (void *)SDRAM_BASE_ADDRESS;
 
 layer2_pixel* display_frame =
-	(void *)SDRAM_BASE_ADDRESS + 5000000; //LCD_LAYER1_BYTES;
+	(void *)SDRAM_BASE_ADDRESS + LCD_LAYER1_BYTES; //LCD_LAYER1_BYTES;
 
 // TODO: This mem address gives problems with the byte def 
 
@@ -242,4 +242,7 @@ void show_frame(void)
     LTDC_L2CFBAR = (uint32_t)k;
 }
 
-
+void blacken_frame(void)
+{
+    memset(cur_frame,0x00,240*320);
+}
