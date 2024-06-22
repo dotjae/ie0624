@@ -36,9 +36,12 @@ uint8_t gfx_getRotation(void);
 void gfx_setRotation(uint8_t x);
 uint16_t gfx_width(void);
 uint16_t gfx_height(void);
+uint8_t gfx_size(void);
 void gfx_fillRoundRect(int16_t x, int16_t y, int16_t w,
 		       int16_t h, int16_t r, uint8_t color);
 void gfx_box(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, int16_t line_w);
+void gfx_puts_centered(char* s, int16_t y);
+
 #define GFX_WIDTH   320
 #define GFX_HEIGHT  240
 
@@ -54,6 +57,5 @@ extern struct gfx_state __gfx_state;
 
 #define GFX_BLACK          0x00
 #define GFX_WHITE          0xff
-
 
 #endif /* _ADAFRUIT_GFX_H */

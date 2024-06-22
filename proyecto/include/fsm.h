@@ -89,7 +89,6 @@ typedef enum
 typedef enum
 {
     LOGOS,
-    CREDITS,
     GIT_QR,
 } git_state;
 

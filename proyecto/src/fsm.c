@@ -441,21 +441,22 @@ void menu_fsm(void)
             }
         break;
         case GIT:
-            gfx_fillScreen(GFX_BLACK);
             switch (GIT_STATE)
             {
                 case LOGOS:
-                    gfx_box(100,200,120,20,4,1);
-                    gfx_setCursor(152,205);
-                    gfx_puts("Ok");
+                    gfx_drawBitmap(0,0,logos);
+                    
+                    currentY = 75;
+                    gfx_setTextSize(1);
+                    gfx_puts_centered("IE0624", currentY += 0);
+                    gfx_puts_centered("Laboratorio de Microcontroladores", currentY += 15);
+                    gfx_puts_centered("Proyecto de microcontroladores", currentY += 15);
+                    gfx_puts_centered("Profesor:", currentY += 15);
+                    gfx_puts_centered("MSc. Marco Villalta F.", currentY += 15);
+                    gfx_puts_centered("Estudiantes:", currentY += 15);
+                    gfx_puts_centered("Jose Flores Q.", currentY += 15);
+                    gfx_puts_centered("Roger Piovet G.", currentY += 15);
 
-                    if (gpio_get(GPIOA, GPIO0))
-                    {
-                            GIT_STATE = CREDITS;
-                            milli_sleep(10);
-                    }
-                break;
-                case CREDITS:
                     gfx_box(100,200,120,20,4,1);
                     gfx_setCursor(152,205);
                     gfx_puts("Ok");
@@ -463,19 +464,25 @@ void menu_fsm(void)
                     if (gpio_get(GPIOA, GPIO0))
                     {
                             GIT_STATE = GIT_QR;
-                            milli_sleep(10);
+                            milli_sleep(50);
                     }
                 break;
                 case GIT_QR:
+                    currentY = 15;
+                    gfx_setTextSize(2);
+                    gfx_puts_centered("Repositorio", currentY += 0);
+                    gfx_drawBitmap(90,50,qr);
+        
                     gfx_box(100,200,120,20,4,1);
+                    gfx_setTextSize(1);
                     gfx_setCursor(152,205);
                     gfx_puts("Ok");
 
                     if (gpio_get(GPIOA, GPIO0))
                     {
-                            GIT_STATE = CREDITS;
+                            GIT_STATE = LOGOS;
                             STATE = MAIN_MENU;
-                            milli_sleep(10);
+                            milli_sleep(50);
                     }
                 break;
             }

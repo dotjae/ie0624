@@ -2,6 +2,7 @@
 // Generated with TTF2BMH
 // Font Pixel Operator HB 8
 // Font Size: 8
+
 const char bitmap_32[] = {0,0,0,0,0,0};
 const char bitmap_33[] = {0,0,95,95,0,0};
 const char bitmap_34[] = {0,7,7,0,7,7};

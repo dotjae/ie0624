@@ -41,6 +41,7 @@
 #include "font.c"
 
 #define pgm_read_double_word(addr) (*(const uint8_t *)(addr))
+#define FONT_CHAR_WIDTH 8
 
 struct gfx_state __gfx_state;
 
@@ -314,4 +315,19 @@ uint16_t gfx_width(void)
 uint16_t gfx_height(void)
 {
 	return __gfx_state._height;
+}
+
+uint8_t gfx_size(void)
+{
+	return __gfx_state.textsize;
+}
+
+/* Place a string in the middle of the screen by calculating the
+ * position of the first char of the string so the whole
+ * string is centered */
+void gfx_puts_centered(char* s, int16_t y)
+{
+    int16_t sPos = (GFX_WIDTH - gfx_size() * FONT_CHAR_WIDTH * (strlen(s) + 1))/2;  // account for '\0' by adding 1 for ascciz
+    gfx_setCursor(sPos, y);
+    gfx_puts(s);
 }
