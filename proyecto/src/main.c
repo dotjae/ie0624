@@ -25,14 +25,10 @@ int main(void)
     /* set up graphics lib */
     gfx_init(draw_pixel, 320, 240);
     
-    cdcam_init();
-    
 	while (1) {
-        blacken_frame();
-        //gfx_fillScreen(GFX_BLACK);
+        gfx_fillScreen(GFX_BLACK);
         menu_fsm();
         show_frame();
-        send_usb_data("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
     }
 
 }

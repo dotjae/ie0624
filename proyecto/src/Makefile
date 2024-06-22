@@ -6,7 +6,7 @@ SHARED_DIR += ../include/
 SHARED_DIR += ../bitmaps/
 
 # peripheral init files 
-CFILES += button.c clock.c console.c lcd-dma.c lcd-spi.c sdram.c random.c usb.c
+CFILES += button.c clock.c console.c lcd-dma.c lcd-spi.c sdram.c random.c
 
 ###########
 # bitmaps #
