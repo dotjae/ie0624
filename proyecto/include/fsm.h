@@ -51,6 +51,7 @@ typedef struct
 {
     uint16_t x,y;
     uint16_t height;
+    uint8_t score;
 } paddleXY;
 
 // for ball movement
@@ -75,6 +76,7 @@ typedef enum
     SAVE,
     GOAL,
     HORIZONTAL,
+    WINNER,
 } ball_state;
 
 // long-short press states
@@ -92,7 +94,7 @@ typedef enum
     GIT_QR,
 } git_state;
 
-#define INIT_PADDLE_Y(paddle) do{(paddle).y = 90;} while(0)  // TODO: generalize for any paddle height
+#define INIT_PADDLE_Y(paddle) do{(paddle).y = 90;(paddle).score = 0;} while(0)  // TODO: generalize for any paddle height
 #define MOV_PADDLE 5   // pixels paddle moves while button is actioned
 #define LINE_HEIGHT 20
 
@@ -102,5 +104,6 @@ void ball_update(void);
 uint8_t dumb_agent(uint16_t paddle_y, int16_t ball_dy, int16_t ball_dx);
 dir ball_Dir(void);
 int long_press(void);
+static void draw_game_division(void);
 
 #endif

@@ -30,6 +30,7 @@ uint8_t agent_decision;
 paddleXY Paddle1;
 paddleXY Paddle2;
 ballXY Ball;
+char buf[10];
 
 void menu_fsm(void)
 {
@@ -259,6 +260,20 @@ void menu_fsm(void)
             }
             break;
         case PVP:
+            /* Draw division */
+            draw_game_division();
+
+            /* Print scoreboard */
+            gfx_setTextSize(3);
+            sprintf(buf, "%d", Paddle1.score);                    
+            gfx_setCursor(124,15);
+            gfx_puts(buf);
+
+            sprintf(buf, "%d", Paddle2.score);                    
+            gfx_setCursor(170,15);
+            gfx_puts(buf);
+            
+
             /* left paddle */
             // move paddle down
             if (gpio_get(GPIOA,GPIO1))
@@ -336,14 +351,49 @@ void menu_fsm(void)
                     BALL_STATE = FLOATING;
                 break;
                 case GOAL:
+
                     ball_update();
                     if (Ball.x <= -10 || Ball.x >= 330)
+                    {
                         BALL_STATE = START;
+                        if (Ball.x <= -10)
+                            Paddle2.score += 1;
+                        else if (Ball.x >= 330)
+                            Paddle1.score += 1;
+                    }
+                    if (Paddle1.score == 10 || Paddle2.score == 10)
+                    {
+                        BALL_STATE = WINNER;
+                    }
                 break;
                 case HORIZONTAL:
                     Ball.dy = -Ball.dy;
                     ball_update();
                     BALL_STATE = FLOATING;
+                break;
+                case WINNER:
+                    gfx_setCursor(100,100);
+                    gfx_setTextSize(2);
+                    currentY = 90;
+
+                    if (Paddle1.score == 10)
+                    {
+                        gfx_box(75,currentY + 10,150,50,4,1);
+                        gfx_puts_centered("Jugador 1", currentY += 20);
+                        gfx_puts_centered("ganador", currentY += 20);
+                    }
+                    else if (Paddle2.score == 10)
+                    {
+                        gfx_box(75,currentY + 10,150,50,4,1);
+                        gfx_puts_centered("Jugador 2", currentY += 20);
+                        gfx_puts_centered("ganador", currentY += 20);
+                    }
+
+                    if (gpio_get(GPIOA,GPIO0))
+                    {
+                        STATE = MAIN_MENU;
+                        BALL_STATE = START;
+                    }
                 break;
             }
         break;
@@ -569,4 +619,20 @@ int long_press(void)
             return SHORT_PRESS;
     }
     return NOT_PRESS;
+}
+
+void draw_game_division(void)
+{
+    uint8_t color;
+    for (int i = 0; i < 240/8; i++)
+    {
+        if (i % 2)
+            color = GFX_BLACK;
+        else 
+            color = GFX_WHITE;
+
+        gfx_drawFastVLine(159,8*i + 4,8,color);
+        gfx_drawFastVLine(160,8*i + 4,8,color);
+        gfx_drawFastVLine(161,8*i + 4,8,color);
+    }
 }
