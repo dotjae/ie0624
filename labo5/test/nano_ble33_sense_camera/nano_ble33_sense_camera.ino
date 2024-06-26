@@ -18,10 +18,6 @@
 #include <Labo_5_-_Labo._Microcontroladores_inferencing.h>
 #include <Arduino_OV767X.h> //Click here to get the library: https://www.arduino.cc/reference/en/libraries/arduino_ov767x/
 
-// #include "detection_responder.h"
-// #include "tensorflow/lite/c/common.h"
-
-
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -33,7 +29,6 @@
 
 void RespondToDetection(float background_score, float mask_score, float no_mask_score);
 
-
 /*
  ** NOTE: If you run into TFLite arena allocation issue.
  **
@@ -41,8 +36,7 @@ void RespondToDetection(float background_score, float mask_score, float no_mask_
  ** Try defining "-DEI_CLASSIFIER_ALLOCATION_STATIC" in boards.local.txt (create
  ** if it doesn't exist) and copy this file to
  ** `<ARDUINO_CORE_INSTALL_PATH>/arduino/hardware/<mbed_core>/<core_version>/`.
- **h"
-// #include "tensorflow/lite/c/common.h"
+ **
  ** See
  ** (https://support.arduino.cc/hc/en-us/articles/360012076960-Where-are-the-installed-cores-located-)
  ** to find where Arduino installs cores on your machine.
@@ -231,7 +225,6 @@ void loop()
                     bb.width,
                     bb.height);
         }
-
     // Print the prediction results (classification)
 #else
         ei_printf("Predictions:\r\n");
@@ -239,6 +232,7 @@ void loop()
             ei_printf("  %s: ", ei_classifier_inferencing_categories[i]);
             ei_printf("%.5f\r\n", result.classification[i].value);
         }
+#endif
 
 float mask_score, no_mask_score, background_score;
 
@@ -246,11 +240,8 @@ background_score = result.classification[0].value;
 mask_score = result.classification[1].value;
 no_mask_score = result.classification[2].value;
 
-
 RespondToDetection(background_score, mask_score, no_mask_score);
 
-
-#endif
 
     // Print anomaly result (if it exists)
 #if EI_CLASSIFIER_HAS_ANOMALY
