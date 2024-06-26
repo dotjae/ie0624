@@ -18,6 +18,10 @@
 #include <Labo_5_-_Labo._Microcontroladores_inferencing.h>
 #include <Arduino_OV767X.h> //Click here to get the library: https://www.arduino.cc/reference/en/libraries/arduino_ov767x/
 
+// #include "detection_responder.h"
+// #include "tensorflow/lite/c/common.h"
+
+
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -27,6 +31,9 @@
 
 #define DWORD_ALIGN_PTR(a)   ((a & 0x3) ?(((uintptr_t)a + 0x4) & ~(uintptr_t)0x3) : a)
 
+void RespondToDetection(float background_score, float mask_score, float no_mask_score);
+
+
 /*
  ** NOTE: If you run into TFLite arena allocation issue.
  **
@@ -34,7 +41,8 @@
  ** Try defining "-DEI_CLASSIFIER_ALLOCATION_STATIC" in boards.local.txt (create
  ** if it doesn't exist) and copy this file to
  ** `<ARDUINO_CORE_INSTALL_PATH>/arduino/hardware/<mbed_core>/<core_version>/`.
- **
+ **h"
+// #include "tensorflow/lite/c/common.h"
  ** See
  ** (https://support.arduino.cc/hc/en-us/articles/360012076960-Where-are-the-installed-cores-located-)
  ** to find where Arduino installs cores on your machine.
@@ -231,6 +239,17 @@ void loop()
             ei_printf("  %s: ", ei_classifier_inferencing_categories[i]);
             ei_printf("%.5f\r\n", result.classification[i].value);
         }
+
+float mask_score, no_mask_score, background_score;
+
+background_score = result.classification[0].value;
+mask_score = result.classification[1].value;
+no_mask_score = result.classification[2].value;
+
+
+RespondToDetection(background_score, mask_score, no_mask_score);
+
+
 #endif
 
     // Print anomaly result (if it exists)
@@ -771,3 +790,75 @@ void OV7675::readBuf()
         while ((*hrefPort & hrefMask) != 0); // wait for LOW
     }
 } /* OV7675::readBuf() */
+
+
+void RespondToDetection(float background_score, float mask_score, float no_mask_score) {
+  static bool is_initialized = false;
+  if (!is_initialized) {
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, HIGH);
+    // Pins for the built-in RGB LEDs on the Arduino Nano 33 BLE Sense
+    pinMode(LEDR, OUTPUT);
+    pinMode(LEDG, OUTPUT);
+    pinMode(LEDB, OUTPUT);
+    // Switch the LEDs off
+    digitalWrite(LEDG, HIGH);
+    digitalWrite(LEDB, HIGH);
+    digitalWrite(LEDR, HIGH);
+    is_initialized = true;
+  }
+
+  // Note: The RGB LEDs on the Arduino Nano 33 BLE
+  // Sense are on when the pin is LOW, off when HIGH.
+
+  // Switch on the green LED when a person is detected,
+  // the blue when no person is detected
+  
+  
+
+  // Flash the yellow LED after every inference.
+  // The builtin LED is on when the pin is HIGH
+  int highest_score;
+
+  if (background_score > mask_score && background_score > no_mask_score)
+  {
+    digitalWrite(LEDB, LOW);
+    digitalWrite(LEDG, HIGH);
+    digitalWrite(LEDR, HIGH);
+  }
+  else if (mask_score > no_mask_score && mask_score > background_score)
+  {
+    digitalWrite(LEDG, LOW);
+    digitalWrite(LEDB, HIGH);
+    digitalWrite(LEDR, HIGH);
+  }
+  else
+  {
+    digitalWrite(LEDR, LOW);
+    digitalWrite(LEDG, HIGH);
+    digitalWrite(LEDB, HIGH);
+  }
+
+  delay(1000);
+
+
+
+
+
+
+
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(100);
+  digitalWrite(LED_BUILTIN, HIGH);
+
+
+  // float person_score_frac, person_score_int;
+  // float no_person_score_frac, no_person_score_int;
+  // person_score_frac = std::modf(person_score * 100, &person_score_int);
+  // no_person_score_frac = std::modf(no_person_score * 100, &no_person_score_int);
+  // MicroPrintf("Person score: %d.%d%% No person score: %d.%d%%",
+  //             static_cast<int>(person_score_int),
+  //             static_cast<int>(person_score_frac * 100),
+  //             static_cast<int>(no_person_score_int),
+  //             static_cast<int>(no_person_score_frac * 100));
+}
