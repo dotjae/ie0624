@@ -28,8 +28,13 @@ de máscara facial implementado con el kit de Tiny Machine Learning de Arduino.
     ```bash
     cd ie0624/labo5/nano_ble33_sense_camera
     ```
+3. Abre Arduino IDE:
+    ```bash
+    arduino
+    ```
+4. Navega hacia  `Sketch > Include Library > Add . ZIP Library` y escoje el archivo `ei-labo-5--labo.-microcontroladores-arduino-1.0.7.zip` que corresponde a la librería generada por Edge-Impulse para el modelo entrenado.
 
-3. Compila el código:
+5. Compila el código:
     ```bash
     arduino-cli compile --fqbn arduino:mbed_nano:nano33ble ./nano_ble33_sense_camera.ino --output-dir .
     ```
