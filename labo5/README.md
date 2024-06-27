@@ -92,10 +92,13 @@ de máscara facial implementado con el kit de Tiny Machine Learning de Arduino.
 
 2. Espere a que se realice la inferencia. Cuando la inferencia sea realizada, se prenderá el LED RGB en la placa Arduino 33 BLE Lite. Se tendrán 3 casos dependiendo del color del LED que se encienda:
 
+<center>
 | Color del LED RGB | Detección      |
 |-------------------|----------------|
 | Rojo              | Sin máscarilla |
 | Verde             | Con mascarilla |
 | Azul              | No hay cara    |
+</center>
+
 </details>
 
