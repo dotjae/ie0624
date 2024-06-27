@@ -44,9 +44,9 @@ de máscara facial implementado con el kit de Tiny Machine Learning de Arduino.
 
 2. Conecte la tarjeta Arduino Nano BLE 33 Lite la PC por medio del cable USB Mini-B.
 
-3. Utilice el siguiente comando para subir el código al microcontrolador. Asegurese de que utilice el puerto serial correcto para cargar el firmware. Puede revisar donde está conectado su microcontrolador con el comando `ls /dev`.
+3. Utilice el siguiente comando para subir el código al microcontrolador. `/dev/port` corresponde al puerto serial en donde está conectado el microcontrolador. Puede revisar donde está conectado su microcontrolador con el comando `ls /dev`.
     ```bash
-    arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:mbed_nano:nano33ble --input-file nano_ble33_sense_camera.ino.hex
+    arduino-cli upload -p /dev/port --fqbn arduino:mbed_nano:nano33ble --input-file nano_ble33_sense_camera.ino.hex
     ```
 </details>
 
@@ -59,7 +59,7 @@ de máscara facial implementado con el kit de Tiny Machine Learning de Arduino.
     sudo minicom -s
     ```
 
-2. Escoja `Configuración de puerto serie` y asegurese que tenga la siguiente configuración. `/dev/port` corresponde al puerto serial en donde está conectado el microcontrolador.
+2. Escoja `Configuración de puerto serie` y asegurese que tenga la siguiente configuración. 
 ```
     +-----------------------------------------------------------------------+
     | A - Dispositivo Serie      : /dev/port                                |
@@ -88,7 +88,7 @@ de máscara facial implementado con el kit de Tiny Machine Learning de Arduino.
 ### Clasificación de máscara facial
 <details><summary><b>Mostrar instrucciones</b></summary>
 
-1. Apunte la cámara OV7675 hacia una cara o cualquier otro objeto.
+1. Apunte la cámara OV7675 hacia una cara o cualquier objeto.
 
 2. Espere a que se realice la inferencia. Cuando la inferencia sea realizada, se prenderá el LED RGB en la placa Arduino 33 BLE Lite. Se tendrán 3 casos dependiendo del color del LED que se encienda:
 
