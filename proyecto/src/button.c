@@ -24,7 +24,7 @@ void button_init(void)
     /*      Paddle controls 
      *                  UP      DOWN
      * Left paddle      PA0     PA1
-     * Right paddle     PA3     PA7
+     * Right paddle     PA5    PA7
      * */
     gpio_mode_setup(GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_PULLDOWN,
             GPIO0 | GPIO1 | GPIO5 | GPIO7); 

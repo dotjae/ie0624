@@ -104,6 +104,6 @@ void ball_update(void);
 uint8_t dumb_agent(uint16_t paddle_y, int16_t ball_dy, int16_t ball_dx);
 dir ball_Dir(void);
 int long_press(void);
-static void draw_game_division(void);
+void draw_game_division(void);
 
 #endif
