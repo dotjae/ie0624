@@ -91,8 +91,11 @@ de máscara facial implementado con el kit de Tiny Machine Learning de Arduino.
 1. Apunte la cámara OV7675 hacia una cara o cualquier otro objeto.
 
 2. Espere a que se realice la inferencia. Cuando la inferencia sea realizada, se prenderá el LED RGB en la placa Arduino 33 BLE Lite. Se tendrán 3 casos dependiendo del color del LED que se encienda:
-- Rojo  -> Se detectó una cara sin máscara.
-- Verde -> Se detectó una cara con mascarilla.
-- Azul  -> No se detectó una cara. 
+
+| Color del LED RGB | Detección      |
+|-------------------|----------------|
+| Rojo              | Sin máscarilla |
+| Verde             | Con mascarilla |
+| Azul              | No hay cara    |
 </details>
 
