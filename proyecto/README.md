@@ -8,19 +8,19 @@ Esta guía proporciona los pasos necesarios para compilar y cargar una adaptaci�
 
 Para poder usar los controles del juego, debe construir el siguiente esquemático:
 
+<center>
 ![Alt text](./esquematico.jpg)
+</center>
 
 En la siguiente tabla, se muestran los controles para ambos jugadores:
 
 <center>
-
 | Pin                 | Control                  |
 |:-------------------:|:------------------------:|
 | PA0                 | Arriba J1/Selección Menu |
 | PA1                 | Abajo J2                 |
 | PA5                 | Arriba J2                |
 | PA7                 | Abajo J2                 |
-
 </center>
 
 ## Requisitos
