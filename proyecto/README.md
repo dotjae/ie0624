@@ -8,8 +8,7 @@ Esta guía proporciona los pasos necesarios para compilar y cargar una adaptaci�
 
 Para poder usar los controles del juego, debe construir el siguiente esquemático:
 
-![Alt text](./prueba.svg)
-<img src="./prueba.svg">
+![Alt text](./esquematico.jpg)
 
 En la siguiente tabla, se muestran los controles para ambos jugadores:
 
