@@ -3,6 +3,17 @@
 ## microPong con STM32F429I-DISCOVERY
 
 Esta guía proporciona los pasos necesarios para compilar y cargar una adaptación del juego Pong al microcontrolador STM32429I-DISCOVERY
+<center>
+
+![Alt text](./figs/gameplay.jpeg)
+
+</center>
+
+<center>
+
+![Alt text](./figs/main_menu.jpeg)
+
+</center>
 
 ## Esquemático
 
@@ -10,7 +21,7 @@ Para poder usar los controles del juego, debe construir el siguiente esquemátic
 
 <center>
 
-![Alt text](./esquematico.jpg)
+![Alt text](./figs/esquematico.jpg)
 
 </center>
 
@@ -20,10 +31,10 @@ En la siguiente tabla, se muestran los controles para ambos jugadores:
 
 | Pin                 | Control                  |
 |:-------------------:|:------------------------:|
-| PA0                 | Arriba J1/Selección Menu |
+| PA0                 | Arriba J2/Selección Menu |
 | PA1                 | Abajo J2                 |
-| PA5                 | Arriba J2                |
-| PA7                 | Abajo J2                 |
+| PA5                 | Arriba J1                |
+| PA7                 | Abajo J1                 |
 
 </center>
 

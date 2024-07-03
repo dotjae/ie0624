@@ -266,51 +266,47 @@ void menu_fsm(void)
             /* Print scoreboard */
             gfx_setTextSize(3);
             sprintf(buf, "%d", Paddle1.score);                    
-            gfx_setCursor(124,15);
+            gfx_setCursor(80,15);
             gfx_puts(buf);
 
             sprintf(buf, "%d", Paddle2.score);                    
-            gfx_setCursor(170,15);
+            gfx_setCursor(220,15);
             gfx_puts(buf);
             
 
             /* left paddle */
             // move paddle down
-            if (gpio_get(GPIOA,GPIO5))
+            if (gpio_get(GPIOA,GPIO5) && Paddle1.y <= 175)
             {
                 Paddle1.y += MOV_PADDLE;
-                gpio_toggle(GPIOG,GPIO13);
             }
 
             // move paddle up
-            if (gpio_get(GPIOA,GPIO7))
+            if (gpio_get(GPIOA,GPIO7) && Paddle1.y > 5)
             {
                 Paddle1.y -= MOV_PADDLE;
-                gpio_toggle(GPIOG,GPIO14);
             }
             
-            if (Paddle1.y >= 180) Paddle1.y = 180;
-            if (Paddle1.y <= 0) Paddle1.y = 0;
+            // if (Paddle1.y >= 175) Paddle1.y = 175;
+            // if (Paddle1.y <= 0) Paddle1.y = 0;
 
             gfx_fillRect(15,Paddle1.y,10,60,GFX_WHITE);
 
             /* right paddle */
             // move paddle down
-            if (gpio_get(GPIOA,GPIO0) && Paddle2.y <= 165)
+            if (gpio_get(GPIOA,GPIO0) && Paddle2.y <= 175)
             {
                 Paddle2.y += MOV_PADDLE;
-                gpio_toggle(GPIOG,GPIO13);
             }
 
             // move paddle up
-            if (gpio_get(GPIOA,GPIO1) && Paddle2.y > 15)
+            if (gpio_get(GPIOA,GPIO1) && Paddle2.y > 5)
             {
                 Paddle2.y -= MOV_PADDLE;
-                gpio_toggle(GPIOG,GPIO14);
             }
 
-            if (Paddle2.y >= 180) Paddle2.y = 180;
-            if (Paddle2.y <= 0) Paddle2.y = 0;
+            // if (Paddle2.y >= 180) Paddle2.y = 180;
+            // if (Paddle2.y <= 0) Paddle2.y = 0;
 
             gfx_fillRect(295,Paddle2.y,10,60,GFX_WHITE);
             
@@ -403,21 +399,19 @@ void menu_fsm(void)
             
             /* left paddle */
             // move paddle down
-            if (gpio_get(GPIOA,GPIO1))
+            if (gpio_get(GPIOA,GPIO5) && Paddle1.y <= 175)
             {
                 Paddle1.y += MOV_PADDLE;
-                gpio_toggle(GPIOG,GPIO13);
             }
 
             // move paddle up
-            if (gpio_get(GPIOA,GPIO0))
+            if (gpio_get(GPIOA,GPIO7) && Paddle1.y > 5)
             {
                 Paddle1.y -= MOV_PADDLE;
-                gpio_toggle(GPIOG,GPIO14);
             }
             
-            if (Paddle1.y >= 165) Paddle1.y = 165;
-            if (Paddle1.y <= 15 ) Paddle1.y = 15;
+            // if (Paddle1.y >= 175) Paddle1.y = 175;
+            // if (Paddle1.y <= 0) Paddle1.y = 0;
 
             gfx_fillRect(15,Paddle1.y,10,60,GFX_WHITE);
 
@@ -436,10 +430,9 @@ void menu_fsm(void)
                 Paddle2.y = Paddle2.y;
                 break;
             }
-
-            if (Paddle2.y >= 165) Paddle2.y = 165;
-            if (Paddle2.y <= 15 ) Paddle2.y = 15;
-
+            
+            if (Paddle2.y <= 5) Paddle2.y = 5;
+            if (Paddle2.y >= 175) Paddle2.y = 175;
             gfx_fillRect(295,Paddle2.y,10,60,GFX_WHITE);
             
             /* ball */
