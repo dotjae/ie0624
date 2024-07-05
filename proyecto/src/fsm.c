@@ -416,7 +416,7 @@ void menu_fsm(void)
             gfx_fillRect(15,Paddle1.y,10,60,GFX_WHITE);
 
             // Hard-coded "dumb" agent to test.
-            agent_decision = dumb_agent(Paddle2.y, Ball.dy, Ball.dx);
+            agent_decision = dumb_agent(Paddle2.y, Ball.y);
 
             switch (agent_decision)
             {
@@ -514,7 +514,7 @@ void menu_fsm(void)
                     currentY = 15;
                     gfx_setTextSize(2);
                     gfx_puts_centered("Repositorio", currentY += 0);
-                    gfx_drawBitmap(90,50,qr);
+                    gfx_drawBitmap(120,80,qr);
         
                     gfx_box(100,200,120,20,4,1);
                     gfx_setTextSize(1);
@@ -542,34 +542,18 @@ void ball_update()
 
 // <<<<<<< HEAD
 
-uint8_t dumb_agent(uint16_t paddle_y, int16_t ball_dy, int16_t ball_dx)
+uint8_t dumb_agent(uint16_t paddle_y, int16_t ball_y)
 {
 
 
-    if (ball_dx > 0 && ball_dy < 0)
+    if (ball_y < paddle_y + 30)
     {
-        if (paddle_y > 250){
-            return 0;
-        }
-        else 
-        {
         return 1;
-        }
     }
-    else if (ball_dx > 0 && ball_dy > 0)
-    {
-        if (paddle_y < 70){
-            return 1;
-        }
-        else 
+    else 
         {
         return 0;
         }
-    }
-    else
-    {
-        return 2;
-    }
 }
 // =======
 dir ball_Dir(void)

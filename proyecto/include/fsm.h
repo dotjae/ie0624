@@ -101,7 +101,7 @@ typedef enum
 // function definitions
 void menu_fsm(void);
 void ball_update(void);
-uint8_t dumb_agent(uint16_t paddle_y, int16_t ball_dy, int16_t ball_dx);
+uint8_t dumb_agent(uint16_t paddle_y, int16_t ball_y);
 dir ball_Dir(void);
 int long_press(void);
 void draw_game_division(void);
